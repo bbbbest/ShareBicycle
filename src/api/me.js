@@ -12,27 +12,14 @@ export default {
     return axios.post('/pwd', qs.stringify({old: old, n: n}));
   },
   fetchUnProcessFlag () {
-    let u = false;
-    let f = false;
-    let a = false;
-    axios.get('/users?havemsg').then((response) => {
-      if (response.data.data.total > 0) {
-        u = true;
-      }
-    });
-    axios.get('/activities?havemsg').then((response) => {
-      if (response.data.data.total > 0) {
-        a = true;
-      }
-    });
-    axios.get('/feedback?havemsg').then((response) => {
-      if (response.data.data.total > 0) {
-        f = true;
-      }
-    });
-
     return new Promise((resolve, reject) => {
-      resolve({u: u, f: f, a: a});
+      axios.all([
+        axios.get('/users?t=havemsg'),
+        axios.get('/activities?t=havemsg'),
+        axios.get('/feedback?t=havemsg')
+      ]).then(axios.spread((d1, d2, d3) => {
+        resolve({u: d1.data.data.total > 0, a: d2.data.data.total > 0, f: d3.data.data.total > 0});
+      }));
     });
   }
 };

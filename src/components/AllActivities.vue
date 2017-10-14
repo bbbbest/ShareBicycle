@@ -23,6 +23,9 @@
           ></el-autocomplete>
         </el-col>
         <el-col :span="13" style="text-align: right">
+          <span class="add-button">
+            <a href="javascript:void(0)" @click="openDialog">添加新活动</a>
+          </span>
           <el-button class="submit" :loading="loading" @click="loadData(pagination.currentPage, pagination.pageSize)">
             {{loading? '加载中':'刷新'}}
           </el-button>
@@ -58,6 +61,9 @@
               <div v-else-if="props.row.status == -1" class="handled uncheck">
                 <i class="ion-close"></i>
               </div>
+            </div>
+            <div class="replyContent" v-if="props.row.status != 0">
+              <div class="description">{{ props.row.replyContent }}</div>
             </div>
           </template>
         </el-table-column>
@@ -119,6 +125,49 @@
         <el-col :span="6">&nbsp;</el-col>
       </el-row>
     </div>
+    <el-dialog
+      title="活动信息"
+      :visible.sync="dialogVisible"
+      :before-close="handleDialogClose">
+      <div style="width: 90%">
+        <el-form
+          ref="activityInfo"
+          :model="activityInfo"
+          label-width="80px" :rules="rules">
+          <el-form-item label="活动名称" prop="title">
+            <el-input v-model="activityInfo.title" placeholder="请选择一个吸引人的标题"></el-input>
+          </el-form-item>
+          <el-form-item label="发起人" prop="creator">
+            <el-input value="官方" disabled></el-input>
+          </el-form-item>
+          <el-form-item label="开始时间" prop="startTime">
+            <el-date-picker
+              v-model="activityInfo.startTime"
+              type="datetime"
+              placeholder="选择日期时间"
+              align="right"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="结束时间" prop="endTime">
+            <el-date-picker
+              v-model="activityInfo.endTime"
+              type="datetime"
+              placeholder="选择日期时间"
+              align="right"
+              :picker-options="pickerOptions">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="活动描述" prop="description">
+            <el-input type="textarea" :rows="3" placeholder="请输入活动的描述信息"
+                      v-model.number="activityInfo.description"></el-input>
+          </el-form-item>
+          <el-form-item>
+            <el-button type="primary" :loading="activityInfo.loading" class="submit" @click="commit">提交</el-button>
+          </el-form-item>
+        </el-form>
+      </div>
+    </el-dialog>
   </div>
   <div class="container" v-else>没有权限</div>
 </template>
@@ -152,8 +201,24 @@
       this.loadData(pagination.currentPage, pagination.pageSize);
     },
     data () {
+      let checkStart = (rule, value, callback) => {
+        const now = Date.now();
+        if (value < now) {
+          callback(new Error('开始时间不能早于当前时间'));
+        } else {
+          callback();
+        }
+      };
+      let checkEnd = (rule, value, callback) => {
+        if (value < this.activityInfo.startTime || Date.now()) {
+          callback(new Error('结束时间不能早于开始时间!'));
+        } else {
+          callback();
+        }
+      };
       // 数据
       return {
+        dialogVisible: false,
         activeTab: 'all',
         loading: false,
         option: 0,
@@ -178,10 +243,61 @@
           }
         ],
         timeout: null,
-        reply: ''
+        reply: '',
+        activityInfo: {
+          title: '',
+          startTime: '',
+          endTime: '',
+          loading: false,
+          description: ''
+        },
+        pickerOptions: {
+          shortcuts: [{
+            text: '明天',
+            onClick (picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24);
+              picker.$emit('pick', date);
+            }
+          }, {
+            text: '三天后',
+            onClick (picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24 * 3);
+              picker.$emit('pick', date);
+            }
+          }, {
+            text: '一周后',
+            onClick (picker) {
+              const date = new Date();
+              date.setTime(date.getTime() + 3600 * 1000 * 24 * 7);
+              picker.$emit('pick', date);
+            }
+          }]
+        },
+        rules: {
+          title: {required: true, message: '标题不能为空', trigger: 'blur'},
+          startTime: {required: true, message: '开始时间不能为空', validator: checkStart, trigger: 'blur'},
+          endTime: {required: true, message: '结束时间不能为空', validator: checkEnd, trigger: 'blur'},
+          description: {required: true, message: '描述信息不能为空', trigger: 'blur'}
+        }
       };
     },
     methods: {
+      openDialog () {
+        this.dialogVisible = true;
+      },
+      closeDialog () {
+        this.dialogVisible = false;
+      },
+      handleDialogClose () {
+        this.closeDialog();
+        this.$message({
+          message: '取消操作',
+          type: 'info',
+          duration: 1000
+        });
+      },
       /**
        * 准许（1）或回绝（-1）
        * @param row 所在行
@@ -189,18 +305,33 @@
        */
       submit (row, status) {
         if (status === 1) {
-          fetcher.activities.update({id: row.id, status: 1, replyContent: ''})
-            .then((response) => {
-              if (response.data.status === 200) {
-                this.$message.success('更新成功');
-                row.status = status;
-              } else {
+          this.$prompt('请输入回复信息', '提示', {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            inputValue: '系统默认回复'
+          }).then(({value}) => {
+            console.log(value);
+            let len = 10;
+            let msg = value.length > len ? value.substring(0, len) + '...' : value;
+            fetcher.activities.update({id: row.id, status: 1, replyContent: value})
+              .then((response) => {
+                if (response.data.status === 200) {
+                  this.$message.success('回复成功，理由：' + msg);
+                  row.status = status;
+                  row.replyContent = value;
+                } else {
+                  this.$message.error('更新失败');
+                }
+              })
+              .catch(() => {
                 this.$message.error('更新失败');
-              }
-            })
-            .catch(() => {
-              this.$message.error('更新失败');
+              });
+          }).catch(() => {
+            this.$message({
+              type: 'info',
+              message: '已取消'
             });
+          });
         } else {
           this.$prompt('请输入回绝理由', '提示', {
             confirmButtonText: '确定',
@@ -213,6 +344,7 @@
                 if (response.data.status === 200) {
                   this.$message.success('回绝成功，理由：' + msg);
                   row.status = status;
+                  row.replyContent = value;
                 } else {
                   this.$message.success('回复失败');
                 }
@@ -278,8 +410,6 @@
             cb(val.data.values.map((val) => {
               return {value: val.value.toString()};
             }));
-          }).catch((error) => {
-            console.log(error);
           });
         }, 1000);
       },
@@ -293,6 +423,38 @@
           this.activities.splice(0, this.activities.length, response.data.data.value);
         }).then(() => {
           this.prefix = '';
+        });
+      },
+      commit () {
+        this.$refs['activityInfo'].validate((valid) => {
+          if (valid) {
+            this.activityInfo.loading = true;
+            fetcher.activities.create({
+              createBy: 'company',
+              content: {
+                title: this.activityInfo.title,
+                creator: this.activityInfo.creator,
+                description: this.activityInfo.description,
+                createTime: this.activityInfo.createTime,
+                endTime: this.activityInfo.endTime
+              }
+            }).then((res) => {
+              if (res.data.status === 200) {
+                // success
+                this.$message.success('创建成功');
+              } else {
+                // failed
+                this.$message.error('创建失败');
+              }
+            }).catch(() => {
+              // failed
+              this.$message.error('创建失败');
+            }).then(() => {
+              this.activityInfo.loading = false;
+              this.closeDialog();
+              this.loadCurrentPage(0);
+            });
+          }
         });
       }
     },
@@ -309,7 +471,7 @@
 <style scoped>
   @import "../assets/global/css/global.css";
 
-  .content {
+  .replyContent, .content {
     line-height: 2;
     width: 100%;
   }
@@ -353,5 +515,24 @@
   .unhandled {
     position: relative;
     top: 10px;
+  }
+
+  .replyContent :before {
+    content: '回复内容';
+    display: block;
+    color: #8c939d;
+    width: 120px;
+    min-height: 40px;
+    font-size: 1.2em;
+  }
+
+  .add-button:before {
+    content: " + ";
+    font-weight: bold;
+  }
+
+  .add-button a {
+    color: #324057;
+    text-decoration: none;
   }
 </style>

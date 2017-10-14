@@ -42,5 +42,8 @@ export default {
   },
   update (val) {
     return axios.put('/activities', val);
+  },
+  create (val) {
+    return axios.post('/activities', val);
   }
 };

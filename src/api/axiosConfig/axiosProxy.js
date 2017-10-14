@@ -13,7 +13,6 @@ axios.interceptors.request.use(function (config) {
     if (config.method === 'post') {
       config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
     }
-    console.log(config.headers['Content-Type']);
   } else {
     config.headers['Content-Type'] = 'text/plain';
   }

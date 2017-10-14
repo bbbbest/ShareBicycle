@@ -38,8 +38,7 @@
             .catch(() => {
               this.$message({
                 type: 'error',
-                message: 'Error!',
-                duration: 2000
+                message: '登陆失败!'
               });
             });
         } else {

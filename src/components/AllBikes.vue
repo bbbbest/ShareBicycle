@@ -250,27 +250,33 @@
             .then((response) => {
               if (response.data.status === 200) {
                 this.$message.success('删除成功');
-                this.loadData(this.pagination.currentPage, this.pagination.pageSize);
+                if (this.bikes.length === 1) {
+                  this.loadCurrentPage(-1);
+                } else {
+                  this.loadCurrentPage(0);
+                }
               } else {
                 this.$message.error('删除失败');
               }
             })
             .catch(() => {
               this.$message.error('删除失败');
-            })
-            .then(() => {
-              this.bikeInfo.loading = false;
             });
         }).catch(() => {
           this.$message.info('已取消删除');
         });
       },
+      loadCurrentPage (pageOffset) {
+        let pagination = this.$store.getters.bikesPagination;
+        this.loadData(pagination.currentPage + pageOffset, pagination.pageSize);
+      },
       getPhoto (id) {
+        // TODO
         return 'https://upload.wikimedia.org/wikipedia/commons/4/41/Left_side_of_Flying_Pigeon.jpg';
       },
       submit () {
         this.bikeInfo.loading = true;
-        fetcher.bikes.del({id: this.bikeInfo.id, lockId: this.bikeInfo.lockId, status: this.bikeInfo.status})
+        fetcher.bikes.update({id: this.bikeInfo.id, lockId: this.bikeInfo.lockId, status: this.bikeInfo.status})
           .then(response => {
             this.$message.success('更新成功');
           })
@@ -283,6 +289,7 @@
           .then(() => {
             this.bikeInfo.loading = false;
             this.closeDialog();
+            this.loadCurrentPage(0);
           });
       },
       dynamicQuery (queryString, cb) {
@@ -315,6 +322,7 @@
         });
       },
       getNameById (id) {
+        // TODO 需查询
         return '用户 ' + id;
       }
     },

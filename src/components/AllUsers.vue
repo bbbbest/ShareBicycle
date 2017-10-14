@@ -286,7 +286,11 @@
             .then((response) => {
               if (response.data.status === 200) {
                 this.$message.success('删除成功');
-                this.loadData(this.pagination.currentPage, this.pagination.pageSize);
+                if (this.users.length === 1) {
+                  this.loadCurrentPage(-1);
+                } else {
+                  this.loadCurrentPage(0);
+                }
               } else {
                 this.$message.error('删除失败');
               }
@@ -297,6 +301,10 @@
         }).catch(() => {
           this.$message.info('已取消删除');
         });
+      },
+      loadCurrentPage (offset) {
+        let pagination = this.$store.getters.usersPagination;
+        this.loadData(pagination.currentPage + offset, pagination.pageSize);
       },
       handleTabClick (tab, event) {
         let pagination = this.$store.getters.usersPagination;
@@ -313,8 +321,6 @@
             cb(val.data.values.map((val) => {
               return {value: val.value.toString()};
             }));
-          }).catch((error) => {
-            console.log(error);
           });
         }, 1000);
       },
@@ -346,6 +352,7 @@
           .then(() => {
             this.userInfo.loading = false;
             this.closeDialog();
+            this.loadCurrentPage(0);
           });
       }
     },

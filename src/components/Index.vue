@@ -175,6 +175,26 @@
         this.$axios.defaults.headers['Authorization'] = this.$store.getters.token;
       }
     },
+    mounted () {
+      if (this.$store.getters.userMSG) {
+        this.$notify.info({
+          title: '待办',
+          message: '新的用户请求'
+        });
+      }
+      if (this.$store.getters.activityMSG) {
+        this.$notify.info({
+          title: '待办',
+          message: '新的活动请求'
+        });
+      }
+      if (this.$store.getters.feedbackMSG) {
+        this.$notify.info({
+          title: '待办',
+          message: '新的反馈信息'
+        });
+      }
+    },
     methods: {
       // 方法
       exit () {

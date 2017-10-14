@@ -29,8 +29,9 @@ export const actions = {
             reject();
           }
         })
-        .catch(() => {
+        .catch((error) => {
           // 失败-回调，指未成功连接
+          console.log(error);
           reject();
         });
     });

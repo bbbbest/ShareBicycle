@@ -205,13 +205,13 @@
             if (response.data.status === 200) {
               row.status = 1;
               row.replyContent = content;
-              this.$message.success('更新成功');
+              this.$message.success('回复成功');
             } else {
-              this.$message.error('更新失败');
+              this.$message.error('回复失败');
             }
           })
           .catch(() => {
-            this.$message.error('更新失败');
+            this.$message.error('回复失败');
           });
       },
       /* edit (row) {
