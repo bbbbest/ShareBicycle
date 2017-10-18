@@ -15,7 +15,7 @@ export const actions = {
             // 设置登陆标志
             commit(types.SET_IS_LOGIN, true);
             // 设置个人信息
-            commit(types.SET_ADMIN_INFO, data.data);
+            commit(types.SET_ADMIN_INFO, data.data.user);
             // 抓取并初始化权限表
             dispatch(types.FETCH_ALL_PRIVILEGES);
             // 初始化个人权限

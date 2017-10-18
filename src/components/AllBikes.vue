@@ -51,7 +51,7 @@
             <p>姓名: {{ clickedUser.name }}</p>
             <p>电话: {{ clickedUser.phone }}</p>
             <div slot="reference">
-              <span @click="clickName(scope.row.from)">{{ getNameById(scope.row.from) }}</span>
+              <span @click="clickName(scope.row.from)">{{ scope.row.name }}</span>
             </div>
           </el-popover>
         </template>
@@ -320,10 +320,6 @@
         }).then(() => {
           this.prefix = '';
         });
-      },
-      getNameById (id) {
-        // TODO 需查询
-        return '用户 ' + id;
       }
     },
     computed: {
