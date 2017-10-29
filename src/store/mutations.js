@@ -20,6 +20,7 @@ export const mutations = {
     state.have.feedbackMSG = false;
   },
   [types.SET_UNPROCESS_FLAG] (state, res) {
+    // todo
     state.have.userMSG = res.u;
     state.have.activityMSG = res.f;
     state.have.feedbackMSG = res.a;

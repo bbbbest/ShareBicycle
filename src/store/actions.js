@@ -21,7 +21,7 @@ export const actions = {
             // 初始化个人权限
             dispatch(types.FETCH_PRIVILEGE);
             // 查询待完成消息
-            dispatch(types.FETCHER_UN_PROCESS_FLAG);
+            commit(types.SET_UNPROCESS_FLAG, data.data.haveMessage);
             // 成功-回调
             resolve();
           } else {
@@ -43,10 +43,5 @@ export const actions = {
     commit(types.SET_IS_LOGIN, false);
     window.sessionStorage.clear();
     window.localStorage.clear();
-  },
-  [types.FETCHER_UN_PROCESS_FLAG] ({commit}) {
-    fetcher.me.fetchUnProcessFlag().then((res) => {
-      commit(types.SET_UNPROCESS_FLAG, res);
-    });
   }
 };

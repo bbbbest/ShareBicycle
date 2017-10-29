@@ -1,6 +1,6 @@
 import axios from 'axios';
-// axios.defaults.baseURL = 'http://localhost:8080';
-axios.defaults.baseURL = 'http://u26t8q.natappfree.cc';
+axios.defaults.baseURL = 'http://localhost:8080';
+// axios.defaults.baseURL = 'http://u26t8q.natappfree.cc';
 axios.defaults.timeout = 1000;
 axios.defaults.headers = {
   'Content-Type': 'application/json',
