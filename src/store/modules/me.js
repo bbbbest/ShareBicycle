@@ -68,9 +68,9 @@ const getters = {
   updateDealrecord: (state) => state.me.privilege.dealrecord.update
 };
 const actions = {
-  [types.RESET_PASSWORD] ({commit}, {old, n}) {
+  [types.RESET_PASSWORD] ({commit}, {id, first, second}) {
     return new Promise((resolve, reject) => {
-      fetcher.me.resetPWD({old: old, n: n})
+      fetcher.me.resetPWD({id: id, first: first, second: second})
         .then((response) => {
           if (response.data.status === 200) {
             resolve();
@@ -103,11 +103,11 @@ const actions = {
   }
 };
 const mutations = {
-  [types.SET_ADMIN_INFO] (state, {adminId, username, name, privilegeId}) {
-    state.me.adminId = adminId;
-    state.me.username = username;
-    state.me.name = name;
-    state.me.privilegeId = privilegeId;
+  [types.SET_ADMIN_INFO] (state, val) {
+    state.me.adminId = val.adminId;
+    state.me.username = val.userName;
+    state.me.name = val.name;
+    state.me.privilegeId = val.adminRoleId;
   },
   [types.SET_ADMIN_PRIVILEGE] (state, privilege) {
     state.me.privilege = privilege;

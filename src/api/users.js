@@ -1,5 +1,5 @@
 import axios from './axiosConfig/axiosProxy';
-// import qs from 'qs';
+import qs from 'qs';
 
 export default {
   fetchPagination (current, size) {
@@ -17,12 +17,10 @@ export default {
     return axios.get('/users?t=havemsg');
   },
   fetchUnProcess (current, size) {
-    return axios.get('/users?t=requests', {
-      params: {
-        start: current,
-        pagesize: size
-      }
-    });
+    return axios.get('/users?t=requests', qs.stringify({
+      start: current,
+      pagesize: size
+    }));
   },
   dynamicFetch ({type, prefix}) {
     return axios.get('/users', {

@@ -47,7 +47,7 @@
         width="160"
         align="center">
         <template scope="scope">
-          <div>from</div>
+          <div>{{scope.row.from}}</div>
           <el-popover trigger="click" placement="top">
             <p>姓名: {{ clickedUser.name }}</p>
             <p>电话: {{ clickedUser.phone }}</p>

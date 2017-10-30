@@ -12,15 +12,16 @@
 
 <script>
   import * as types from '../store/types';
-  import util from '../store/utils';
+//  import util from '../store/utils';
+  import app from '../store/app';
 
   export default {
     name: 'login',
     data () {
       return {
         system: {
-          name: '郑在行后台系统',
-          version: '1.0.0'
+          name: app.name,
+          version: app.version
         },
         username: '',
         password: ''
@@ -31,7 +32,7 @@
         if (this.username !== '' && this.password !== '') {
           this.$store.dispatch(types.DO_LOGIN, {username: this.username, password: this.password})
             .then(() => {
-              util.greet(this.$store.getters.name);
+//              util.greet(this.$store.getters.name);
               this.$message.success(`您好，管理员：${this.$store.getters.name}`);
               this.$router.push('/bikes');
             })

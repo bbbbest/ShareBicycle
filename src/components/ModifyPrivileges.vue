@@ -100,7 +100,6 @@
   };
 
   import {mapGetters} from 'vuex';
-  //  import * as types from '../store/types';
   import fetcher from '../api/fetcher';
 
   export default {
@@ -182,18 +181,15 @@
       loadData () {
         if (!this.loading) {
           this.loading = true;
+          this.admins = [];
           fetcher.privilege.fetchAllAdminPrivileges()
             .then((response) => {
               if (response.data.status === 200) {
-                this.admins = response.data.data.admins;
-              } else {
-                this.admins = [];
+                this.admins.splice(0, this.admins.length, ...response.data.data.admins);
+                console.log(this.admins);
               }
             })
-            .catch(() => {
-              this.admins = [];
-            })
-            .then(() => {
+            .finally(() => {
               this.loading = false;
             });
         }
@@ -212,12 +208,14 @@
       },
       closeDialog () {
         this.dialogVisible = false;
+        this.loadData();
       },
       // 方法
       add () {
         this.form.adminId = '';
         this.form.name = '';
-        this.form.role = '';
+        this.form.username = '';
+        this.form.roleId = '';
         this.openDialog();
       },
       edit (row) {
@@ -232,9 +230,16 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
+          fetcher.privilege.del(row.adminId).then((response) => {
+            if (response.data.status === 200) {
+              this.error('删除成功!');
+            } else {
+              this.error('删除失败!');
+            }
+          }).catch(() => {
+            this.error('删除失败!');
+          }).finally(() => {
+            this.closeDialog();
           });
         }).catch(() => {
           this.$message({
@@ -252,12 +257,45 @@
         });
       },
       submit () {
-        this.closeDialog();
-        this.$message({
-          type: 'success',
-          message: '修改成功！',
-          duration: 1000
-        });
+        if (this.form.adminId === '') {
+          fetcher.privilege.add({
+            t: 'add',
+            username: this.form.username,
+            name: this.form.name,
+            roleId: this.form.roleId
+          }).then((response) => {
+            if (response.data.status === 200) {
+              this.error('添加成功!');
+            } else {
+              this.error('添加失败!');
+            }
+          }).catch(() => {
+            this.error('添加失败!');
+          }).finally(() => {
+            this.closeDialog();
+          });
+        } else {
+          console.log({
+            t: 'upt',
+            id: this.form.adminId,
+            roleId: this.form.roleId
+          });
+          fetcher.privilege.update({
+            t: 'upt',
+            id: this.form.adminId,
+            roleId: this.form.roleId
+          }).then((response) => {
+            if (response.data.status === 200) {
+              this.error('修改成功!');
+            } else {
+              this.error('修改失败!');
+            }
+          }).catch(() => {
+            this.error('修改失败!');
+          }).finally(() => {
+            this.closeDialog();
+          });
+        }
       },
       resetForm () {
         this.form.adminId = '';

@@ -55,7 +55,7 @@
           width="120">
         </el-table-column>
         <el-table-column
-          prop="username"
+          prop="userName"
           label="用户名"
           align="center"
           width="120">
@@ -330,7 +330,7 @@
           type: this.options[this.option].p,
           value: value
         }).then((response) => {
-          this.users.splice(0, this.users.length, response.data.data.value);
+          this.users.splice(0, this.users.length, ...response.data.data.values);
           this.$store.commit(types.SET_USERS_PAGINATION_TOTAL, {total: 1});
         }).then(() => {
           this.prefix = '';

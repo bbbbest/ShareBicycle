@@ -21,8 +21,8 @@ export const mutations = {
   },
   [types.SET_UNPROCESS_FLAG] (state, res) {
     // todo
-    state.have.userMSG = res.u;
-    state.have.activityMSG = res.f;
-    state.have.feedbackMSG = res.a;
+    state.have.userMSG = res.user;
+    state.have.activityMSG = res.activities;
+    state.have.feedbackMSG = res.feedback;
   }
 };

@@ -8,8 +8,13 @@ export default {
       password: password
     }));
   },
-  resetPWD ({old, n}) {
-    return axios.post('/pwd', qs.stringify({old: old, n: n}));
+  resetPWD ({id, first, second}) {
+    return axios.put('/admins', {
+      t: 'mod',
+      id: id,
+      first: first,
+      second: second
+    });
   },
   fetchUnProcessFlag () {
     return new Promise((resolve, reject) => {

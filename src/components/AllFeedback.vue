@@ -48,7 +48,7 @@
               <div class="content">{{ props.row.content }}</div>
               <span class="createTime">{{ props.row.createTime }}</span>
             </div>
-            <div v-if="props.row.status == 0" class="reply">
+            <div v-if="props.row.status == 0 || props.row.status == 1" class="reply">
               <el-input type="textarea" autosize v-model="reply"></el-input>
               <el-button class="submit" size="small" @click="submitReply(props.row, reply)">提交</el-button>
             </div>
@@ -59,7 +59,7 @@
           </template>
         </el-table-column>
         <el-table-column
-          prop="id"
+          prop="adviseId"
           label="编号"
           align="center"
           width="180">
@@ -198,12 +198,11 @@
         });
       },
       submitReply (row, content) {
-        // TODO
         this.reply = '';
-        fetcher.feedback.update({id: row.id, replyContent: content})
+        fetcher.feedback.update({id: row.adviseId, replyContent: content})
           .then((response) => {
             if (response.data.status === 200) {
-              row.status = 1;
+              row.status = 2;
               row.replyContent = content;
               this.$message.success('回复成功');
             } else {
@@ -214,27 +213,6 @@
             this.$message.error('回复失败');
           });
       },
-      /* edit (row) {
-        this.openDialog();
-      }, */
-      /*
-      del (row) {
-        this.$confirm('您即将删除一条反馈, 仍要继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消删除'
-          });
-        });
-      }, */
       // 处理分页
       handleSizeChange (val) {
         this.$store.commit(types.SET_FEEDBACK_PAGINATION_PAGE_SIZE, {pageSize: val});

@@ -51,24 +51,24 @@
             <div class="content">
               <div class="description">{{ props.row.description }}</div>
               <span class="createTime">{{ props.row.createTime }}</span>
-              <div v-if="props.row.status == 0" class="unhandled">
-                <el-button type="success" size="small" @click="submit(props.row, 1)">准许</el-button>
-                <el-button type="danger" size="small" @click="submit(props.row, -1)">回绝</el-button>
+              <div v-if="props.row.status == -1 || props.row.status == 1" class="unhandled">
+                <el-button type="success" size="small" @click="submit(props.row, 2)">准许</el-button>
+                <el-button type="danger" size="small" @click="submit(props.row, 3)">回绝</el-button>
               </div>
-              <div v-else-if="props.row.status == 1" class="handled check">
+              <div v-else-if="props.row.status == 2" class="handled check">
                 <i class="ion-checkmark"></i>
               </div>
-              <div v-else-if="props.row.status == -1" class="handled uncheck">
+              <div v-else-if="props.row.status == 3" class="handled uncheck">
                 <i class="ion-close"></i>
               </div>
             </div>
-            <div class="replyContent" v-if="props.row.status != 0">
+            <div class="replyContent" v-if="props.row.status != -1 && props.row.status != 1">
               <div class="description">{{ props.row.replyContent }}</div>
             </div>
           </template>
         </el-table-column>
         <el-table-column
-          prop="id"
+          prop="activityId"
           label="编号"
           align="center"
           width="180">
@@ -158,6 +158,9 @@
               :picker-options="pickerOptions">
             </el-date-picker>
           </el-form-item>
+          <el-form-item label="人数限制" prop="maxUserCount">
+            <el-input-number v-model="activityInfo.maxUserCount" :min="10"></el-input-number>
+          </el-form-item>
           <el-form-item label="活动描述" prop="description">
             <el-input type="textarea" :rows="3" placeholder="请输入活动的描述信息"
                       v-model.number="activityInfo.description"></el-input>
@@ -210,7 +213,7 @@
         }
       };
       let checkEnd = (rule, value, callback) => {
-        if (value < this.activityInfo.startTime || Date.now()) {
+        if (value < (this.activityInfo.startTime || Date.now())) {
           callback(new Error('结束时间不能早于开始时间!'));
         } else {
           callback();
@@ -248,6 +251,7 @@
           title: '',
           startTime: '',
           endTime: '',
+          maxUserCount: 20,
           loading: false,
           description: ''
         },
@@ -277,8 +281,8 @@
         },
         rules: {
           title: {required: true, message: '标题不能为空', trigger: 'blur'},
-          startTime: {required: true, message: '开始时间不能为空', validator: checkStart, trigger: 'blur'},
-          endTime: {required: true, message: '结束时间不能为空', validator: checkEnd, trigger: 'blur'},
+          startTime: [{required: true, message: '开始时间不能为空'}, {validator: checkStart, trigger: 'blur'}],
+          endTime: [{required: true, message: '结束时间不能为空'}, {validator: checkEnd, trigger: 'blur'}],
           description: {required: true, message: '描述信息不能为空', trigger: 'blur'}
         }
       };
@@ -304,16 +308,15 @@
        * @param status
        */
       submit (row, status) {
-        if (status === 1) {
+        if (status === 2) {
           this.$prompt('请输入回复信息', '提示', {
             confirmButtonText: '确定',
             cancelButtonText: '取消',
             inputValue: '系统默认回复'
           }).then(({value}) => {
-            console.log(value);
             let len = 10;
             let msg = value.length > len ? value.substring(0, len) + '...' : value;
-            fetcher.activities.update({id: row.id, status: 1, replyContent: value})
+            fetcher.activities.update({id: row.activityId, status: 2, replyContent: value})
               .then((response) => {
                 if (response.data.status === 200) {
                   this.$message.success('回复成功，理由：' + msg);
@@ -339,12 +342,13 @@
           }).then(({value}) => {
             let len = 10;
             let msg = value.length > len ? value.substring(0, len) + '...' : value;
-            fetcher.activities.update({id: row.id, status: -1, replyContent: value})
+            fetcher.activities.update({id: row.activityId, status: 3, replyContent: value})
               .then((response) => {
                 if (response.data.status === 200) {
                   this.$message.success('回绝成功，理由：' + msg);
                   row.status = status;
                   row.replyContent = value;
+                  this.reload();
                 } else {
                   this.$message.success('回复失败');
                 }
@@ -359,6 +363,10 @@
             });
           });
         }
+      },
+      reload () {
+        let pagination = this.$store.getters.activitiesPagination;
+        this.loadData(pagination.currentPage, pagination.pageSize);
       },
       // 刷新按钮
       loadData (current, size) {
@@ -387,8 +395,7 @@
       // 处理分页
       handleSizeChange (val) {
         this.$store.commit(types.SET_ACTIVITIES_PAGINATION_PAGE_SIZE, {pageSize: val});
-        let pagination = this.$store.getters.activitiesPagination;
-        this.loadData(pagination.currentPage, pagination.pageSize);
+        this.reload();
       },
       handleCurrentChange (val) {
         this.$store.commit(types.SET_ACTIVITIES_PAGINATION_CURRENT, {current: val});
@@ -430,18 +437,17 @@
           if (valid) {
             this.activityInfo.loading = true;
             fetcher.activities.create({
-              createBy: 'company',
-              content: {
-                title: this.activityInfo.title,
-                creator: this.activityInfo.creator,
-                description: this.activityInfo.description,
-                createTime: this.activityInfo.createTime,
-                endTime: this.activityInfo.endTime
-              }
+              title: this.activityInfo.title,
+              creator: 1,
+              description: this.activityInfo.description,
+              startTime: this.activityInfo.startTime.getTime(),
+              endTime: this.activityInfo.endTime.getTime(),
+              maxUserCount: this.activityInfo.maxUserCount
             }).then((res) => {
               if (res.data.status === 200) {
                 // success
                 this.$message.success('创建成功');
+                this.reload();
               } else {
                 // failed
                 this.$message.error('创建失败');

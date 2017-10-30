@@ -1,11 +1,11 @@
 <template>
   <div class='reset-password'>
-    <el-form ref='form' :model='form' label-width='80px' :rules="rules">
-      <el-form-item label='旧密码' prop="oldPassword">
-        <el-input type='password' v-model='form.oldPassword'></el-input>
+    <el-form ref='form' :model='form' label-width='140px' :rules="rules">
+      <el-form-item label='请输入密码' prop="first">
+        <el-input type='password' v-model='form.first'></el-input>
       </el-form-item>
-      <el-form-item label='新密码' prop="newPassword">
-        <el-input type='password' v-model='form.newPassword'></el-input>
+      <el-form-item label='请再次输入密码' prop="second">
+        <el-input type='password' v-model='form.second'></el-input>
       </el-form-item>
       <el-form-item>
         <el-button class="submit" :loading="submitting" @click='submit'>提交修改</el-button>
@@ -16,9 +16,6 @@
 <script type='text/ecmascript-6'>
   export default {
     name: 'reset-password',
-    beforeCreate () {
-      console.log('reset before create');
-    },
     data () {
       // 数据
       let checkOldPassword = (rule, value, callback) => {
@@ -28,23 +25,23 @@
 
       let checkNewPassword = (rule, value, callback) => {
         // 检查二次输入密码合格
-        if (value === this.form.oldPassword) {
-          callback(new Error('不能与旧密码相同'));
+        if (value !== this.form.first) {
+          callback(new Error('两次密码不同'));
         }
         callback();
       };
       return {
         submitting: false,
         form: {
-          oldPassword: '',
-          newPassword: ''
+          first: '',
+          second: ''
         },
         rules: {
-          oldPassword: [
+          first: [
             {required: true, message: '旧密码不可为空'},
             {validator: checkOldPassword, trigger: 'blur'}
           ],
-          newPassword: [
+          second: [
             {required: true, message: '新密码不可为空'},
             {validator: checkNewPassword, trigger: 'blur'}
           ]
@@ -56,20 +53,20 @@
       submit () {
         this.$refs['form'].validate((valid) => {
           if (valid) {
-            console.log(valid);
+            let adminId = this.$store.getters.adminId;
             this.submitting = true;
-            this.$store.dispatch('RESET_PASSWORD', {old: this.form.oldPassword, n: this.form.newPassword})
-              .then(() => {
-                // 修改成功
-                this.$message.success('Success');
-              })
-              .catch(() => {
-                // 修改失败
-                this.$message.error('Error');
-              })
-              .finally(() => {
-                this.submitting = false;
-              });
+            this.$store.dispatch('RESET_PASSWORD', {
+              id: adminId,
+              first: this.form.first,
+              second: this.form.second
+            }).then(() => {
+              this.$message.success('修改成功');
+            }).catch(() => {
+              // 修改失败
+              this.$message.error('修改失败');
+            }).finally(() => {
+              this.submitting = false;
+            });
           } else {
             return false;
           }
