@@ -70,12 +70,16 @@
           prop="cardNumber"
           label="卡编号"
           align="center">
+          <template scope="scope">
+            <label>{{scope.row.cardNumber | cardFilter}}</label>
+          </template>
         </el-table-column>
         <el-table-column
           prop="score"
           label="积分"
           align="center"
-          width="80">
+          sortable
+          width="90">
         </el-table-column>
         <el-table-column
           prop="phone"
@@ -87,6 +91,9 @@
           label="状态"
           align="center"
           width="80">
+          <template scope="scope">
+            <label>{{scope.row.status | statusFilter}}</label>
+          </template>
         </el-table-column>
         <el-table-column
           prop="balance"
@@ -165,6 +172,7 @@
   import * as types from '../store/types';
   import fetcher from '../api/fetcher';
 
+  const statusValue = ['挂失', '冻结', '正常'];
   export default {
     name: 'all-users',
     beforeRouteEnter (to, from, next) {
@@ -363,6 +371,17 @@
         queryPrivilege: 'queryUser',
         updatePrivilege: 'updateUser'
       })
+    },
+    filters: {
+      statusFilter (status) {
+        return statusValue[Number.parseInt(status) + 1];
+      },
+      cardFilter (card) {
+        if (card !== null && card !== '') {
+          return card;
+        }
+        return '未申请';
+      }
     },
     beforeDestroy () {
       this.$store.commit(types.SET_USERS_PAGINATION_CURRENT, {current: 1});

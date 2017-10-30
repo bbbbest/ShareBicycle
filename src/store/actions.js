@@ -10,8 +10,8 @@ export const actions = {
           let data = response.data;
           if (data.status === 200) {
             // set token
-            axios.defaults.headers['Authorization'] = data.data.jwt;
-            commit(types.SET_TOKEN, data.data.jwt);
+            axios.defaults.headers['Authorization'] = data.data.token;
+            commit(types.SET_TOKEN, data.data.token);
             // 设置登陆标志
             commit(types.SET_IS_LOGIN, true);
             // 设置个人信息
@@ -41,6 +41,7 @@ export const actions = {
     axios.defaults.headers['Authorization'] = 'null';
     commit(types.SET_TOKEN, '');
     commit(types.SET_IS_LOGIN, false);
+    commit(types.RESET_ADMIN_INFO);
     window.sessionStorage.clear();
     window.localStorage.clear();
   }

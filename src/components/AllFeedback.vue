@@ -85,7 +85,12 @@
           prop="status"
           label="状态"
           align="center"
-          width="80">
+          width="100">
+          <template scope="scope">
+            <el-tag color="transparent" :type="tagClass(scope.row.status)">
+              {{scope.row.status | statusFilter}}
+            </el-tag>
+          </template>
         </el-table-column>
       </el-table>
       <el-row style="margin-top: 10px">
@@ -111,7 +116,7 @@
   import {mapGetters} from 'vuex';
   import * as types from '../store/types';
   import fetcher from '../api/fetcher';
-
+  const statusValue = ['未读', '未处理', '已处理'];
   export default {
     name: 'all-feedback',
     beforeRouteEnter (to, from, next) {
@@ -255,6 +260,19 @@
         }).then(() => {
           this.prefix = '';
         });
+      },
+      tagClass (status) {
+        if (status === '0' || status === '1') {
+          return 'warning';
+        }
+        if (status === '2') {
+          return 'success';
+        }
+      }
+    },
+    filters: {
+      statusFilter (status) {
+        return statusValue[Number.parseInt(status)];
       }
     },
     computed: {

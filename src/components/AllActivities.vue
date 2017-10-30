@@ -71,13 +71,13 @@
           prop="activityId"
           label="编号"
           align="center"
-          width="180">
+          width="120">
         </el-table-column>
         <el-table-column
           prop="userId"
           label="提出人"
           align="center"
-          width="180">
+          width="80">
         </el-table-column>
         <el-table-column
           prop="title"
@@ -103,10 +103,20 @@
           width="180">
         </el-table-column>
         <el-table-column
+          prop="maxUserCount"
+          label="人数限制"
+          align="center">
+        </el-table-column>
+        <el-table-column
           prop="status"
           label="状态"
           align="center"
-          width="80">
+          width="100">
+          <template scope="scope">
+            <el-tag color="transparent" :type="tagClass(scope.row.status)">
+              {{scope.row.status | statusFilter}}
+            </el-tag>
+          </template>
         </el-table-column>
       </el-table>
       <el-row style="margin-top: 10px">
@@ -179,6 +189,7 @@
   import * as types from '../store/types';
   import fetcher from '../api/fetcher';
 
+  const statusValue = ['未阅读', '', '未处理', '已批准', '已拒绝'];
   export default {
     name: 'all-activities',
     beforeRouteEnter (to, from, next) {
@@ -462,6 +473,22 @@
             });
           }
         });
+      },
+      tagClass (status) {
+        if (status === '0' || status === '-1') {
+          return 'warning';
+        }
+        if (status === '2') {
+          return 'success';
+        }
+        if (status === '3') {
+          return 'danger';
+        }
+      }
+    },
+    filters: {
+      statusFilter (status) {
+        return statusValue[Number.parseInt(status) + 1];
       }
     },
     computed: {

@@ -2,6 +2,7 @@ import axios from './axiosConfig/axiosProxy';
 
 export default {
   fetchPagination (current, size) {
+    console.log(axios.defaults.headers['Authorization']);
     return axios.get('/bikes', {
       params: {
         start: current,

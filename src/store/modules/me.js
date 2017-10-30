@@ -109,6 +109,12 @@ const mutations = {
     state.me.name = val.name;
     state.me.privilegeId = val.adminRoleId;
   },
+  [types.RESET_ADMIN_INFO] (state) {
+    state.me.adminId = '';
+    state.me.username = '';
+    state.me.name = '';
+    state.me.privilegeId = -1;
+  },
   [types.SET_ADMIN_PRIVILEGE] (state, privilege) {
     state.me.privilege = privilege;
   }

@@ -170,11 +170,6 @@
     beforeRouteEnter (to, from, next) {
       next();
     },
-    beforeMount () {
-      if (this.$store.getters.token !== '' && this.$axios.defaults.headers['Authorization'] === 'null') {
-        this.$axios.defaults.headers['Authorization'] = this.$store.getters.token;
-      }
-    },
     mounted () {
       if (this.$store.getters.userMSG) {
         this.$notify.info({

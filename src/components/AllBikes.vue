@@ -82,6 +82,9 @@
         label="状态"
         align="center"
         width="80">
+        <template scope="scope">
+          <el-tag color="transparent" :type="scope.row.status == 1? 'success' : 'danger'">{{scope.row.status | statusFilter}}</el-tag>
+        </template>
       </el-table-column>
       <el-table-column
         prop="energy"
@@ -155,6 +158,7 @@
   import * as types from '../store/types';
   import fetcher from '../api/fetcher';
 
+  const statusValue = ['停用', '正常'];
   export default {
     name: 'all-bikes',
     beforeMount () {
@@ -321,6 +325,11 @@
         }).then(() => {
           this.prefix = '';
         });
+      }
+    },
+    filters: {
+      statusFilter (status) {
+        return statusValue[Number.parseInt(status)];
       }
     },
     computed: {
