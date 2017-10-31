@@ -33,7 +33,7 @@
           this.$store.dispatch(types.DO_LOGIN, {username: this.username, password: this.password})
             .then(() => {
 //              util.greet(this.$store.getters.name);
-              this.$message.success(`您好，管理员：${this.$store.getters.name}`);
+              this.$message.success(`您好, ${this.$store.getters.name}!`);
               this.$router.push('/bikes');
             })
             .catch(() => {

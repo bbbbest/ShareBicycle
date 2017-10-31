@@ -104,6 +104,7 @@
         <el-table-column
           label="操作"
           align="center"
+          v-if="updatePrivilege"
           width="140">
           <template scope="scope">
             <el-button size="small" type="text" @click="edit(scope.row)">编辑</el-button>

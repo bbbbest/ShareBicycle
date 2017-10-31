@@ -119,7 +119,7 @@
       return {
         app: app,
         prefix: '',
-        collapse: true,
+        collapse: false,
         dialogVisible: false,
         rechargeUser: {
           selecting: false,

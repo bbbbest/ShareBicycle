@@ -1,5 +1,5 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="queryAdmin">
     <el-table
       :data="allPrivileges"
       stripe
@@ -124,6 +124,7 @@
       </el-table-column>
     </el-table>
   </div>
+  <div class="container" v-else>没有权限</div>
 </template>
 <script type="text/ecmascript-6">
   import {mapGetters} from 'vuex';
@@ -140,10 +141,10 @@
     },
     computed: {
       // 计算属性
-      ...mapGetters(['allPrivileges'])
+      ...mapGetters(['allPrivileges', 'queryAdmin', 'updateAdmin'])
     }
   };
 </script>
 <style scoped>
- @import "../assets/global/css/global.css";
+  @import "../assets/global/css/global.css";
 </style>

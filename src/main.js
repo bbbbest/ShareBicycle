@@ -12,6 +12,7 @@ import axios from './api/axiosConfig/axiosProxy';
 import VueProgressBar from 'vue-progressbar';
 
 Vue.prototype.$axios = axios;
+
 const options = {
   color: '#13CE66',
   failedColor: '#FF4949',
@@ -38,8 +39,10 @@ new Vue({
   components: {App}
 });
 
+if (store.getters.token !== '') {
+  axios.defaults.headers['Authorization'] = store.getters.token;
+}
 router.beforeEach((to, from, next) => {
-  // TODO
   const islogin = store.state.islogin; // 假设没有登录（这里应从接口获取）
   if (to.meta.requiresAuth && !islogin) { // 需要登录授权，这里还需要判断是否登录
     next('/login'); // 跳转到登录

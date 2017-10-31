@@ -24,7 +24,7 @@
         </el-col>
         <el-col :span="13" style="text-align: right">
           <span class="add-button">
-            <a href="javascript:void(0)" @click="openDialog">添加新活动</a>
+            <a href="javascript:void(0)" @click="openDialog" :disabled="updatePrivilege? 'disabled' : ''">添加新活动</a>
           </span>
           <el-button class="submit" :loading="loading" @click="loadData(pagination.currentPage, pagination.pageSize)">
             {{loading? '加载中':'刷新'}}
@@ -51,7 +51,7 @@
             <div class="content">
               <div class="description">{{ props.row.description }}</div>
               <span class="createTime">{{ props.row.createTime }}</span>
-              <div v-if="props.row.status == -1 || props.row.status == 1" class="unhandled">
+              <div v-if="updatePrivilege && (props.row.status == -1 || props.row.status == 1)" class="unhandled">
                 <el-button type="success" size="small" @click="submit(props.row, 2)">准许</el-button>
                 <el-button type="danger" size="small" @click="submit(props.row, 3)">回绝</el-button>
               </div>
@@ -74,7 +74,7 @@
           width="120">
         </el-table-column>
         <el-table-column
-          prop="userId"
+          prop="userName"
           label="提出人"
           align="center"
           width="80">
@@ -314,7 +314,7 @@
         });
       },
       /**
-       * 准许（1）或回绝（-1）
+       * 准许（2）或回绝（3）
        * @param row 所在行
        * @param status
        */
@@ -475,7 +475,7 @@
         });
       },
       tagClass (status) {
-        if (status === '0' || status === '-1') {
+        if (status === '1' || status === '-1') {
           return 'warning';
         }
         if (status === '2') {
@@ -488,6 +488,8 @@
     },
     filters: {
       statusFilter (status) {
+        console.log(status);
+        console.log(typeof status);
         return statusValue[Number.parseInt(status) + 1];
       }
     },

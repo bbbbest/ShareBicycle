@@ -48,7 +48,7 @@
               <div class="content">{{ props.row.content }}</div>
               <span class="createTime">{{ props.row.createTime }}</span>
             </div>
-            <div v-if="props.row.status == 0 || props.row.status == 1" class="reply">
+            <div v-if="updatePrivilege && (props.row.status == 0 || props.row.status == 1)" class="reply">
               <el-input type="textarea" autosize v-model="reply"></el-input>
               <el-button class="submit" size="small" @click="submitReply(props.row, reply)">提交</el-button>
             </div>
@@ -65,7 +65,7 @@
           width="180">
         </el-table-column>
         <el-table-column
-          prop="creator"
+          prop="userName"
           label="提出人"
           align="center"
           width="180">
@@ -204,7 +204,7 @@
       },
       submitReply (row, content) {
         this.reply = '';
-        fetcher.feedback.update({id: row.adviseId, replyContent: content})
+        fetcher.feedback.update({id: row.adviseId, replyContent: content, adminId: this.$store.getters.adminId})
           .then((response) => {
             if (response.data.status === 200) {
               row.status = 2;

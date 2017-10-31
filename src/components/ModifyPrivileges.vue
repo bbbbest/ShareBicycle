@@ -1,9 +1,7 @@
 <template>
-  <div class="container">
+  <div class="container" v-if="queryAdmin">
     <el-row :gutter="10" style="margin-bottom: 10px">
-      <el-col :span="11">
-        &nbsp;
-        &nbsp;
+      <el-col :span="11">&nbsp;
       </el-col>
       <el-col :span="13" style="text-align: right">
         <span class="add-button"><a href="javascript:void(0)" @click="add">添加管理员</a></span>
@@ -44,6 +42,7 @@
       <el-table-column
         label="操作"
         align="center"
+        v-if="updateAdmin"
         width="130">
         <template scope="scope">
           <el-button size="small" type="text" @click="edit(scope.row)">编辑</el-button>
@@ -87,6 +86,7 @@
       </span>
     </el-dialog>
   </div>
+  <div class="container" v-else>没有权限</div>
 </template>
 <script type="text/ecmascript-6">
   const map = {
@@ -338,7 +338,7 @@
       tableData () {
         return this.admins;
       },
-      ...mapGetters(['allPrivileges'])
+      ...mapGetters(['allPrivileges', 'queryAdmin', 'updateAdmin'])
     },
     filters: {
       aliasFilter: (val) => map[val]
