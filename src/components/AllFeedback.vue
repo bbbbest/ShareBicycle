@@ -41,6 +41,7 @@
         border
         stripe
         max-height="400"
+        @expand="clicked"
         style="width: 100%">
         <el-table-column type="expand" width="30">
           <template scope="props">
@@ -87,9 +88,17 @@
           align="center"
           width="100">
           <template scope="scope">
-            <el-tag color="transparent" :type="tagClass(scope.row.status)">
+            <el-tag :type="tagClass(scope.row.status)">
               {{scope.row.status | statusFilter}}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          align="center"
+          width="80" v-if="updatePrivilege">
+          <template scope="props">
+            <el-button size="small" type="danger" @click="del(props.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -267,6 +276,37 @@
         }
         if (status === '2') {
           return 'success';
+        }
+      },
+      del (row) {
+        this.$confirm('您即将删除一条反馈, 仍要继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          fetcher.feedback.del(row.id)
+            .then((response) => {
+              if (response.data.status === 200) {
+                this.$message.success('删除成功');
+                if (this.bikes.length === 1) {
+                  this.loadCurrentPage(-1);
+                } else {
+                  this.loadCurrentPage(0);
+                }
+              } else {
+                this.$message.error('删除失败');
+              }
+            })
+            .catch(() => {
+              this.$message.error('删除失败');
+            });
+        }).catch(() => {
+          this.$message.info('已取消删除');
+        });
+      },
+      clicked (row, expanded) {
+        if (row.status === '0') {
+          row.status = '1';
         }
       }
     },

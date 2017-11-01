@@ -45,6 +45,7 @@
         border
         stripe
         max-height="400"
+        @expand="clicked"
         style="width: 100%">
         <el-table-column type="expand" width="30">
           <template scope="props">
@@ -71,7 +72,7 @@
           prop="activityId"
           label="编号"
           align="center"
-          width="120">
+          width="80">
         </el-table-column>
         <el-table-column
           prop="userName"
@@ -88,23 +89,24 @@
           prop="createTime"
           label="创建时间"
           align="center"
-          width="180">
+          width="120">
         </el-table-column>
         <el-table-column
           prop="startTime"
           label="开始时间"
           align="center"
-          width="180">
+          width="120">
         </el-table-column>
         <el-table-column
           prop="endTime"
           label="结束时间"
           align="center"
-          width="180">
+          width="120">
         </el-table-column>
         <el-table-column
           prop="maxUserCount"
-          label="人数限制"
+          label="人数"
+          width="60"
           align="center">
         </el-table-column>
         <el-table-column
@@ -113,9 +115,17 @@
           align="center"
           width="100">
           <template scope="scope">
-            <el-tag color="transparent" :type="tagClass(scope.row.status)">
+            <el-tag :type="tagClass(scope.row.status)">
               {{scope.row.status | statusFilter}}
             </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column
+          label="操作"
+          align="center"
+          width="80" v-if="updatePrivilege">
+          <template scope="props">
+            <el-button size="small" type="danger" @click="del(props.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -474,6 +484,32 @@
           }
         });
       },
+      del (row) {
+        this.$confirm('您即将删除一个活动, 仍要继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          fetcher.activities.del(row.id)
+            .then((response) => {
+              if (response.data.status === 200) {
+                this.$message.success('删除成功');
+                if (this.bikes.length === 1) {
+                  this.loadCurrentPage(-1);
+                } else {
+                  this.loadCurrentPage(0);
+                }
+              } else {
+                this.$message.error('删除失败');
+              }
+            })
+            .catch(() => {
+              this.$message.error('删除失败');
+            });
+        }).catch(() => {
+          this.$message.info('已取消删除');
+        });
+      },
       tagClass (status) {
         if (status === '1' || status === '-1') {
           return 'warning';
@@ -484,12 +520,15 @@
         if (status === '3') {
           return 'danger';
         }
+      },
+      clicked (row, expanded) {
+        if (row.status === '-1') {
+          row.status = '1';
+        }
       }
     },
     filters: {
       statusFilter (status) {
-        console.log(status);
-        console.log(typeof status);
         return statusValue[Number.parseInt(status) + 1];
       }
     },

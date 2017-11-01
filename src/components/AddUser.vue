@@ -20,14 +20,28 @@
       <el-form-item>
         <el-checkbox v-model="form.needCard">办理骑行卡</el-checkbox>
       </el-form-item>
-      <el-form-item v-if="form.needCard" label="卡号" prop="cardNumber">
-        <!--自动搜索完成-->
-        <el-input class="w-60" v-model="form.cardNumber">
-        </el-input>
-      </el-form-item>
-      <el-form-item v-if="form.needCard" label="账户金额" prop="balance">
-        <el-input class="w-60" v-model="form.balance"></el-input>
-      </el-form-item>
+      <div v-if="form.needCard">
+        <!--<el-form-item label="学校" prop="school">-->
+          <!--<el-input class="w-60" v-model="form.school">-->
+          <!--</el-input>-->
+        <!--</el-form-item>-->
+        <el-form-item label="院系" prop="department">
+          <el-input class="w-60" v-model="form.department">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="专业" prop="major">
+          <el-input class="w-60" v-model="form.major">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="卡号" prop="cardNumber">
+          <!--自动搜索完成-->
+          <el-input class="w-60" v-model="form.cardNumber">
+          </el-input>
+        </el-form-item>
+        <el-form-item label="账户金额" prop="balance">
+          <el-input class="w-60" v-model="form.balance"></el-input>
+        </el-form-item>
+      </div>
       <el-form-item label="电话" prop="phone">
         <el-input class="w-60" v-model="form.phone"></el-input>
       </el-form-item>
@@ -91,6 +105,9 @@
           password: '',
           password2: '',
           name: '',
+//          school: '',
+          department: '',
+          major: '',
           cardNumber: '',
           phone: '',
           balance: '',

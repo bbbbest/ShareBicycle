@@ -3,7 +3,7 @@
     <!--顶部导航-->
     <header class="header">
       <div class="brand"><span class="name">{{app.name}}</span><span class="version">V {{app.version}}</span></div>
-      <div class="greeting">工号&nbsp;&nbsp;<router-link to="/me" style="text-decoration: none"><span class="user">{{adminId}}</span>
+      <div class="greeting">您好！&nbsp;&nbsp;&nbsp;&nbsp;<router-link to="/me" style="text-decoration: none"><span class="user" style="color: springgreen">{{adminName}}</span>
       </router-link>
       </div>
       <div style="display: inline-block">
@@ -66,42 +66,49 @@
         </el-submenu>
       </el-menu>
     </div>
-    <!--右部主要内容-->
+    <!--充值-->
     <div class="main-content">
       <div class="body">
         <router-view></router-view>
       </div>
     </div>
     <el-dialog
-      :modal-append-to-body="false"
+      @close="closeDialog"
+      :modal-append-to-body="true"
       title="充值"
       :visible.sync="dialogVisible">
       <el-form
-        class="center-block w-80"
+        :inline="true"
         label-width="80px">
-        <el-form-item label="用户名">
+        <el-form-item>
           <el-autocomplete
-            class="w-80"
             v-model="prefix"
             :trigger-on-focus="false"
             :fetch-suggestions="dynamicQuery"
             placeholder="搜索"
             @select="handleSelect"
             icon="search"
-          ></el-autocomplete>
+          >
+            <el-select style="width: 5.5rem;" slot="prepend" v-model="rechargeUser.type" placeholder="请选择">
+              <el-option label="用户名" value="username"></el-option>
+              <el-option label="电话" value="phone"></el-option>
+            </el-select>
+          </el-autocomplete>
         </el-form-item>
-        <el-form-item v-if="rechargeUser.selected">
+        <el-form-item>
+          <el-input class="w-80" v-model="rechargeUser.rechargeValue">
+            <span slot="append">元</span>
+          </el-input>
+        </el-form-item>
+        <el-form-item>
+          <el-button class="submit" @click="submit">提交</el-button>
+        </el-form-item>
+        <el-form-item class="w-100" v-if="rechargeUser.selected">
           <div style="color: crimson; line-height: 24px">
             <p>姓名：{{rechargeUser.name}}</p>
             <p>电话：{{rechargeUser.phone}}</p>
             <p>余额：{{rechargeUser.balance}}</p>
           </div>
-        </el-form-item>
-        <el-form-item label="金额">
-          <el-input class="w-80"><template slot="append">元</template></el-input>
-        </el-form-item>
-        <el-form-item>
-          <el-button class="submit">提交</el-button>
         </el-form-item>
       </el-form>
     </el-dialog>
@@ -122,6 +129,8 @@
         collapse: false,
         dialogVisible: false,
         rechargeUser: {
+          rechargeValue: null,
+          type: 'username',
           selecting: false,
           selected: false,
           name: '123',
@@ -224,12 +233,15 @@
       },
       closeDialog () {
         this.dialogVisible = false;
+        this.prefix = '';
+        this.rechargeUser.selected = false;
+        this.rechargeUser.rechargeValue = null;
       },
       dynamicQuery (queryString, cb) {
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
           fetcher.users.dynamicFetch({
-            type: 'username',
+            type: this.rechargeUser.type,
             prefix: queryString
           }).then((response) => {
             let val = response.data;
@@ -242,11 +254,59 @@
         }, 1000);
       },
       handleSelect (item) {
+        fetcher.users.query({type: this.rechargeUser.type, value: item.value})
+          .then((response) => {
+            if (response.data.status === 200) {
+              let obj = response.data.data.values[0];
+              this.rechargeUser.name = obj.name;
+              this.rechargeUser.phone = obj.phone;
+              this.rechargeUser.balance = obj.balance;
+              this.rechargeUser.selected = true;
+            }
+          });
+      },
+      submit () {
+        this.$confirm(`将为用户 [${this.rechargeUser.name}] 充值 [${this.rechargeUser.rechargeValue}] 元, 是否继续?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          fetcher.users.recharge({
+            type: this.rechargeUser.type,
+            typeValue: this.prefix,
+            money: this.rechargeUser.rechargeValue
+          }).then((response) => {
+            if (response.data.status === 200) {
+              this.$message({
+                type: 'success',
+                message: '充值成功！'
+              });
+              window.location.reload();
+            } else {
+              this.$message({
+                type: 'error',
+                message: '充值失败！'
+              });
+            }
+          }).catch(() => {
+            this.$message({
+              type: 'error',
+              message: '充值失败！'
+            });
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '取消操作！'
+          });
+        }).finally(() => {
+          this.closeDialog();
+        });
       }
     },
     computed: {
-      adminId () {
-        return this.$store.getters.adminInfo.adminId;
+      adminName () {
+        return this.$store.getters.name;
       },
       userMSG () {
         return this.$store.getters.userMSG;

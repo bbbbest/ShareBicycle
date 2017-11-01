@@ -68,9 +68,9 @@ const getters = {
   updateDealrecord: (state) => state.me.privilege.dealrecord.update
 };
 const actions = {
-  [types.RESET_PASSWORD] ({commit}, {id, first, second}) {
+  [types.RESET_PASSWORD] ({commit}, {id, old, first, second}) {
     return new Promise((resolve, reject) => {
-      fetcher.me.resetPWD({id: id, first: first, second: second})
+      fetcher.me.resetPWD({id: id, old: old, first: first, second: second})
         .then((response) => {
           if (response.data.status === 200) {
             resolve();

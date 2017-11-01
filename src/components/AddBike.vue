@@ -23,6 +23,7 @@
           label="用户名">
           <el-autocomplete
             v-model="form.username"
+            autofocus="autofocus"
             :trigger-on-focus="false"
             :fetch-suggestions="dynamicQuery"
             placeholder="请输入用户名"
@@ -48,13 +49,13 @@
           prop="name"
           label="姓名"
           :rules="[{required: true, message: '姓名不可为空', trigger: 'blur'}]">
-          <el-input class="w-40" v-model="form.name"></el-input>
+          <el-input class="w-40" v-model="form.name" autofocus="autofocus"></el-input>
         </el-form-item>
         <el-form-item
           prop="phone"
           label="电话"
-          :rules="[{required: true, message: '电话也不可为空', trigger: 'blur'}]">
-          <el-input class="w-40" v-model="form.phone"></el-input>
+          :rules="rule">
+          <el-input class="w-40" :maxlength="11" v-model.number="form.phone"></el-input>
           <span class="m-l-10px extra-msg">将留作用户名</span>
         </el-form-item>
       </div>
@@ -98,6 +99,15 @@
         </el-form-item>
       </div>
       <!--2. end-->
+      <el-form-item
+        style="height: 30px; line-height: 16px !important; margin-top: -10px;margin-bottom: 10px"
+        label="是否可用">
+        <el-switch
+          v-model="form.canUse"
+          on-color="#13ce66"
+          off-color="#ff4949">
+        </el-switch>
+      </el-form-item>
       <el-form-item>
         <el-button :loading="submitting" class="submit" @click="submit">{{submitting? '请稍侯...' : '提交'}}</el-button>
         <el-button v-if="form.option === 2" type="plain" @click="addBike">新增一辆</el-button>
@@ -112,6 +122,13 @@
   export default {
     name: 'add-bike',
     data () {
+      let checkPhoneNumber = (rule, value, callback) => {
+        if (value < 10000000000) {
+          callback(new Error('电话长度不能小于 11 位'));
+        }
+        callback();
+      };
+
       return {
         timeout: null,
         // <提交按钮> 的状态
@@ -119,6 +136,7 @@
         form: {
           // 顶部选项
           option: 0,
+          canUse: true,
           // 上传图片
           fileList: [],
           uploadUrl: 'http://whomi.cn',
@@ -142,7 +160,11 @@
               lockId: ''
             }
           ]
-        }
+        },
+        rule: [{required: true, message: '电话也不可为空'},
+          {type: 'number', message: '电话必须为数字值'},
+          {validator: checkPhoneNumber, trigger: 'blur'}
+        ]
       };
     },
     methods: {
@@ -236,6 +258,7 @@
           // 已注册
           return {
             role: 1,
+            canUse: this.form.canUse,
             value: {
               username: this.form.username,
               lockId: this.form.lockId
@@ -245,6 +268,7 @@
           // 未注册
           return {
             role: -1,
+            canUse: this.form.canUse,
             value: {
               name: this.form.name,
               phone: this.form.phone,
@@ -259,6 +283,7 @@
           }
           return {
             role: 666,
+            canUse: this.form.canUse,
             values: values
           };
         }

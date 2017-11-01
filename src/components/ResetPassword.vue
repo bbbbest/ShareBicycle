@@ -1,10 +1,13 @@
 <template>
   <div class='reset-password'>
     <el-form ref='form' :model='form' label-width='140px' :rules="rules">
-      <el-form-item label='请输入密码' prop="first">
+      <el-form-item label='请输入旧密码' prop="old">
+        <el-input type='password' v-model='form.old'></el-input>
+      </el-form-item>
+      <el-form-item label='请输入新密码' prop="first">
         <el-input type='password' v-model='form.first'></el-input>
       </el-form-item>
-      <el-form-item label='请再次输入密码' prop="second">
+      <el-form-item label='请再次输入新密码' prop="second">
         <el-input type='password' v-model='form.second'></el-input>
       </el-form-item>
       <el-form-item>
@@ -14,15 +17,11 @@
   </div>
 </template>
 <script type='text/ecmascript-6'>
+  import * as types from '../store/types';
+
   export default {
     name: 'reset-password',
     data () {
-      // 数据
-      let checkOldPassword = (rule, value, callback) => {
-        // 检查密码是否合格
-        callback();
-      };
-
       let checkNewPassword = (rule, value, callback) => {
         // 检查二次输入密码合格
         if (value !== this.form.first) {
@@ -33,16 +32,19 @@
       return {
         submitting: false,
         form: {
+          old: '',
           first: '',
           second: ''
         },
         rules: {
+          old: [
+            {required: true, message: '旧密码不可为空'}
+          ],
           first: [
-            {required: true, message: '旧密码不可为空'},
-            {validator: checkOldPassword, trigger: 'blur'}
+            {required: true, message: '新密码不可为空'}
           ],
           second: [
-            {required: true, message: '新密码不可为空'},
+            {required: true, message: '不可为空'},
             {validator: checkNewPassword, trigger: 'blur'}
           ]
         }
@@ -55,12 +57,15 @@
           if (valid) {
             let adminId = this.$store.getters.adminId;
             this.submitting = true;
-            this.$store.dispatch('RESET_PASSWORD', {
+            this.$store.dispatch(types.RESET_PASSWORD, {
               id: adminId,
+              old: this.form.old,
               first: this.form.first,
               second: this.form.second
             }).then(() => {
               this.$message.success('修改成功');
+              this.$store.dispatch(types.DO_LOGOUT);
+              this.$router.push('/');
             }).catch(() => {
               // 修改失败
               this.$message.error('修改失败');

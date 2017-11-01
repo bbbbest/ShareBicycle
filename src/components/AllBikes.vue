@@ -83,7 +83,9 @@
         align="center"
         width="80">
         <template scope="scope">
-          <el-tag color="transparent" :type="scope.row.status == 1? 'success' : 'danger'">{{scope.row.status | statusFilter}}</el-tag>
+          <el-tag color="transparent" :type="scope.row.status == 1? 'success' : 'danger'">{{scope.row.status |
+            statusFilter}}
+          </el-tag>
         </template>
       </el-table-column>
       <el-table-column
@@ -142,7 +144,13 @@
             <el-input v-model.number="bikeInfo.lockId"></el-input>
           </el-form-item>
           <el-form-item label="状态" prop="status">
-            <el-input v-model.number="bikeInfo.status"></el-input>
+            <el-select v-model="bikeInfo.status" placeholder="请选择">
+              <el-option
+                v-for="item in options2"
+                :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" :loading="bikeInfo.loading" class="submit" @click="submit">确认修改</el-button>
@@ -182,13 +190,25 @@
             value: 1
           }
         ],
+        options2: [{
+          value: '0',
+          label: '不可用'
+        }, {
+          value: '1',
+          label: '可用'
+        }],
         prefix: '',
         advice: [],
         clickedUser: {
           name: '',
           phone: 0
         },
-        bikeInfo: {},
+        bikeInfo: {
+          id: '',
+          photo: '',
+          lockId: '',
+          status: ''
+        },
         bikes: [],
         timeout: null
       };
@@ -242,7 +262,7 @@
         this.bikeInfo.id = row.id;
         this.bikeInfo.photo = row.photo;
         this.bikeInfo.lockId = row.lockId;
-        this.bikeInfo.status = row.status;
+        this.bikeInfo.status = String(row.status);
         this.openDialog();
       },
       del (row) {

@@ -42,5 +42,12 @@ export default {
   },
   update (val) {
     return axios.put('/feedback', val);
+  },
+  del (id) {
+    return axios.delete('/feedback', {
+      params: {
+        activityId: id
+      }
+    });
   }
 };

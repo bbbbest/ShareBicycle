@@ -8,10 +8,11 @@ export default {
       password: password
     }));
   },
-  resetPWD ({id, first, second}) {
+  resetPWD ({id, old, first, second}) {
     return axios.put('/admins', {
       t: 'mod',
       id: id,
+      old: old,
       first: first,
       second: second
     });

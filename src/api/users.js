@@ -49,6 +49,9 @@ export default {
     });
   },
   update (val) {
-    return axios.put('/users', val);
+    return axios.put('/users?t=profile', val);
+  },
+  recharge (val) {
+    return axios.put('/users?t=recharge', val);
   }
 };

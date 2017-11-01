@@ -1,9 +1,9 @@
 <template>
   <div class="login">
-    <div class="form center-block">
+    <div class="form center-block" @keyup.enter="handleLogin">
       <p class="form-title text-center">{{system.name}}</p>
       <p class="form-version text-right">V{{system.version}}</p>
-      <el-input v-model.trim="username" placeholder="请输入用户名"></el-input>
+      <el-input v-model.trim="username" placeholder="请输入用户名" autofocus="autofocus"></el-input>
       <el-input type="password" v-model.trim="password" placeholder="请输入密码"></el-input>
       <el-button class="login-button" @click="handleLogin">登&nbsp;&nbsp;录</el-button>
     </div>

@@ -90,9 +90,14 @@
           prop="status"
           label="状态"
           align="center"
-          width="80">
+          :filters="status"
+          :filter-method="filterTag"
+          filter-placement="bottom-end"
+          width="100">
           <template scope="scope">
-            <label>{{scope.row.status | statusFilter}}</label>
+            <el-tag :type="tagClass(scope.row.status)" close-transition>
+              {{scope.row.status | statusFilter}}
+            </el-tag>
           </template>
         </el-table-column>
         <el-table-column
@@ -137,8 +142,8 @@
             ref="userInfo"
             :model="userInfo"
             label-width="80px">
-            <el-form-item label="用户名" prop="username" class="center-block w-80">
-              <el-input v-model="userInfo.username" disabled></el-input>
+            <el-form-item label="用户名" prop="userName" class="center-block w-80">
+              <el-input v-model="userInfo.userName" disabled></el-input>
             </el-form-item>
             <el-form-item label="姓名" prop="name" class="center-block w-80">
               <el-input v-model="userInfo.name"></el-input>
@@ -153,10 +158,16 @@
               <el-input v-model="userInfo.phone"></el-input>
             </el-form-item>
             <el-form-item label="状态" prop="status" class="center-block w-80">
-              <el-input v-model="userInfo.status"></el-input>
+              <el-select v-model="userInfo.status" placeholder="请选择">
+                <el-option
+                  v-for="item in options2"
+                  :label="item.label"
+                  :value="item.value">
+                </el-option>
+              </el-select>
             </el-form-item>
             <el-form-item label="余额" prop="balance" class="center-block w-80">
-              <el-input v-model="userInfo.balance"></el-input>
+              <el-input v-model="userInfo.balance"><template slot="prepend">￥</template><template slot="append">元</template></el-input>
             </el-form-item>
             <el-form-item class="center-block w-80">
               <el-button class="submit" @click="submit" :loading="userInfo.loading">提交</el-button>
@@ -225,6 +236,16 @@
             value: 3
           }
         ],
+        options2: [{
+          value: '-1',
+          label: '挂失'
+        }, {
+          value: '0',
+          label: '冻结'
+        }, {
+          value: '1',
+          label: '正常'
+        }],
         prefix: '',
         dialogVisible: false,
         // false 为编辑， true 为查看个人信息
@@ -232,7 +253,11 @@
           loading: false
         },
         users: [],
-        timeout: null
+        timeout: null,
+        status: [
+          {text: '挂失', value: '-1'},
+          {text: '冻结', value: '0'},
+          {text: '正常', value: '1'}]
       };
     },
     methods: {
@@ -283,6 +308,7 @@
       },
       edit (row) {
         this.userInfo = row;
+        this.userInfo.balance = Number(row.balance);
         this.openDialog();
       },
       del (row) {
@@ -363,6 +389,20 @@
             this.closeDialog();
             this.loadCurrentPage(0);
           });
+      },
+      tagClass (status) {
+        if (status === '-1') {
+          return 'warning';
+        }
+        if (status === '0') {
+          return 'danger';
+        }
+        if (status === '1') {
+          return 'success';
+        }
+      },
+      filterTag (value, row) {
+        return row.status === value;
       }
     },
     computed: {

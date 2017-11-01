@@ -4,6 +4,22 @@
   margin-left: auto;
 }
 
+.center-inline-block {
+  display: inline-block;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.left-inline-block {
+  display: inline-block;
+  margin-left: 0;
+}
+
+.right-inline-block {
+  display: inline-block;
+  margin-right: 0;
+}
+
 .pull-right {
   float: right !important;
 }
