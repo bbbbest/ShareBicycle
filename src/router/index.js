@@ -100,6 +100,20 @@ export default new Router({
       ]
     },
     {
+      path: '/config',
+      name: 'Config',
+      component: Index,
+      redirect: '/config/info',
+      children: [
+        {
+          path: 'info',
+          name: 'config',
+          meta: {requiresAuth: true},
+          component: resolve => require(['../components/Config'], resolve)
+        }
+      ]
+    },
+    {
       path: '/privileges',
       name: 'auth',
       component: Index,

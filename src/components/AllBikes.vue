@@ -135,7 +135,7 @@
             <el-row>
               <el-col :span="10">
                 <el-card :body-style="{ padding: '0px'}">
-                  <img style="width:100%; display: block;" alt="自行车照片" :src='bikeInfo.photo'>
+                  <img style="width:100%; display: block;" alt="自行车照片" :src="'http://localhost:8080' + bikeInfo.photo">
                 </el-card>
               </el-col>
             </el-row>
@@ -147,6 +147,7 @@
             <el-select v-model="bikeInfo.status" placeholder="请选择">
               <el-option
                 v-for="item in options2"
+                :key="item.value"
                 :label="item.label"
                 :value="item.value">
               </el-option>
@@ -294,10 +295,6 @@
       loadCurrentPage (pageOffset) {
         let pagination = this.$store.getters.bikesPagination;
         this.loadData(pagination.currentPage + pageOffset, pagination.pageSize);
-      },
-      getPhoto (id) {
-        // TODO
-        return 'https://upload.wikimedia.org/wikipedia/commons/4/41/Left_side_of_Flying_Pigeon.jpg';
       },
       submit () {
         this.bikeInfo.loading = true;

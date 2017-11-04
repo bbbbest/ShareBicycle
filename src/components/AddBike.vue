@@ -63,21 +63,29 @@
       <!--1.用户贡献-->
       <div v-if="form.option !== 2">
         <el-form-item
+          :rules="[{required: true, message: '照片不可为空', trigger: 'blur'}]"
           label="照片">
           <el-upload
             ref="upload"
             :action="form.uploadUrl"
             accept="image/*"
+            name="picFile"
+            class="avatar-uploader"
+            :headers="form.uploadHeaders"
+            :multiple="false"
             :data="form.extraUploadData"
             :on-preview="handlePreview"
-            :on-remove="handleRemove"
-            :file-list="form.fileList"
+            :on-success="handleSuccess"
+            :show-file-list="false"
             :before-upload="beforeUpload"
-            :auto-upload="false">
-            <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-            <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-            <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过2Mb</div>
+            with-credentials>
+            <img v-if="imageDialogImageUrl" :src="imageDialogImageUrl" class="avatar">
+            <i v-else class="el-icon-plus avatar-uploader-icon"></i>
+            <div class="el-upload__tip" slot="tip">只能上传jpg/png文件，且不超过2MB</div>
           </el-upload>
+          <el-dialog v-model="imageDialogVisible" size="tiny">
+            <img width="100%" :src="imageDialogImageUrl" alt="">
+          </el-dialog>
         </el-form-item>
         <el-form-item label="锁编号" prop="lockId"
                       :rules="[{required: true, message: '锁编号不可为空', trigger: 'blur'}]">
@@ -130,6 +138,8 @@
       };
 
       return {
+        imageDialogVisible: false,
+        imageDialogImageUrl: '',
         timeout: null,
         // <提交按钮> 的状态
         submitting: false,
@@ -139,7 +149,9 @@
           canUse: true,
           // 上传图片
           fileList: [],
-          uploadUrl: 'http://whomi.cn',
+          uploadUrl: 'http://localhost:8080/admin/image',
+          url: '',
+          uploadHeaders: {Authorization: this.$store.getters.token},
           extraUploadData: {},
           // 已注册用户校验
           selected: false,
@@ -172,11 +184,14 @@
       submitUpload () {
         this.$refs.upload.submit();
       },
-      handleRemove (file, fileList) {
-        // 移除照片
-      },
       handlePreview (file) {
-        // 预览照片
+        this.imageDialogVisible = true;
+      },
+      handleSuccess (response, file, fileList) {
+        if (response.status === 200) {
+          this.form.url = response.data.url;
+          this.imageDialogImageUrl = 'http://localhost:8080' + this.form.url;
+        }
       },
       beforeUpload (file) {
         // 上传前检测
@@ -258,6 +273,7 @@
           // 已注册
           return {
             role: 1,
+            imagePath: this.form.url,
             canUse: this.form.canUse,
             value: {
               username: this.form.username,
@@ -268,6 +284,7 @@
           // 未注册
           return {
             role: -1,
+            imagePath: this.form.url,
             canUse: this.form.canUse,
             value: {
               name: this.form.name,
@@ -287,6 +304,10 @@
             values: values
           };
         }
+      },
+      handlePictureCardPreview (file) {
+        this.imageDialogImageUrl = file.url;
+        this.imageDialogVisible = true;
       }
     },
     filters: {}
@@ -309,4 +330,27 @@
     text-align: center;
   }
 
+  .avatar-uploader .el-upload {
+    border: 1px dashed #d9d9d9;
+    border-radius: 6px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .avatar-uploader .el-upload:hover {
+    border-color: #409EFF;
+  }
+  .avatar-uploader-icon {
+    font-size: 28px;
+    color: #8c939d;
+    width: 178px;
+    height: 178px;
+    line-height: 178px;
+    text-align: center;
+  }
+  .avatar {
+    width: 178px;
+    height: 178px;
+    display: block;
+  }
 </style>

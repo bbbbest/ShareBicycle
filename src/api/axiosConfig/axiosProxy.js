@@ -4,12 +4,11 @@ import axios from 'axios';
 // axios.defaults.baseURL = 'http://u26t8q.natappfree.cc'; // 杜盛飞
 axios.defaults.baseURL = 'http://localhost:8080';
 axios.defaults.timeout = 3000;
+axios.defaults.withCredentials = true;
 axios.defaults.headers = {
   'Content-Type': 'application/json;charset=UTF-8;',
   'Authorization': 'null'
 };
-
-axios.defaults.withCredentials = true;
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
   if (config.method !== 'get' && config.method !== 'delete') {

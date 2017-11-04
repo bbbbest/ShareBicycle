@@ -6,7 +6,7 @@
           <el-select v-model="option" placeholder="请选择">
             <el-option
               v-for="option in options"
-              :key="option.value"
+              :key="option.id"
               :label="'按 ' + option.label"
               :value="option.value">
             </el-option>
@@ -161,6 +161,7 @@
               <el-select v-model="userInfo.status" placeholder="请选择">
                 <el-option
                   v-for="item in options2"
+                  :key="item.id"
                   :label="item.label"
                   :value="item.value">
                 </el-option>

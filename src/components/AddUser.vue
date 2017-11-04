@@ -22,16 +22,18 @@
       </el-form-item>
       <div v-if="form.needCard">
         <!--<el-form-item label="学校" prop="school">-->
-          <!--<el-input class="w-60" v-model="form.school">-->
-          <!--</el-input>-->
+        <!--<el-input class="w-60" v-model="form.school">-->
+        <!--</el-input>-->
         <!--</el-form-item>-->
         <el-form-item label="院系" prop="department">
-          <el-input class="w-60" v-model="form.department">
-          </el-input>
+          <el-select v-model="form.department" placeholder="请选择" @change="loadMajors()">
+            <el-option v-for="dept in departments" :label="dept.name" :value="dept.id" :key="dept.id"></el-option>
+          </el-select>
         </el-form-item>
-        <el-form-item label="专业" prop="major">
-          <el-input class="w-60" v-model="form.major">
-          </el-input>
+        <el-form-item v-if="form.department != ''" label="专业" prop="major">
+          <el-select v-model="form.major" placeholder="请选择">
+            <el-option v-for="major in majors" :label="major.name" :value="major.id" :key="major.id"></el-option>
+          </el-select>
         </el-form-item>
         <el-form-item label="卡号" prop="cardNumber">
           <!--自动搜索完成-->
@@ -100,6 +102,8 @@
         haveUsername: null,
         timeout: null,
         submitting: false,
+        departments: [],
+        majors: [],
         form: {
           username: '',
           password: '',
@@ -137,7 +141,27 @@
         }
       };
     },
+    created () {
+      this.loadDepartments();
+    },
     methods: {
+      loadDepartments () {
+        fetcher.deptmajor.fetchDepartments()
+          .then((response) => {
+            if (response.data.status === 200) {
+              this.departments = response.data.data.depts;
+            }
+          });
+      },
+      loadMajors () {
+        this.form.major = '';
+        fetcher.deptmajor.fetchMajors(this.form.department)
+          .then((response) => {
+            if (response.data.status === 200) {
+              this.majors = response.data.data.majors;
+            }
+          });
+      },
       // 方法
       submit () {
         if (this.haveUsername) {
@@ -181,13 +205,12 @@
       queryUsername () {
         clearTimeout(this.timeout);
         this.timeout = setTimeout(() => {
-          fetcher.users.dynamicFetch({
-            type: 'exact',
-            prefix: this.form.username
-          }).then((response) => {
-            let val = response.data;
-            this.haveUsername = val.data.values.length > 0;
-          });
+          fetcher.users.query({type: 'username', value: this.form.username})
+            .then((response) => {
+              if (response.data.status === 200) {
+                this.haveUsername = response.data.data.values.length > 0;
+              }
+            });
         }, 1000);
       }
     }

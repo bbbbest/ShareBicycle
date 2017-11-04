@@ -3,7 +3,7 @@
     <!--顶部导航-->
     <header class="header">
       <div class="brand"><span class="name">{{app.name}}</span><span class="version">V {{app.version}}</span></div>
-      <div class="greeting">您好！&nbsp;&nbsp;&nbsp;&nbsp;<router-link to="/me" style="text-decoration: none"><span class="user" style="color: springgreen">{{adminName}}</span>
+      <div class="greeting">您好！&nbsp;&nbsp;&nbsp;&nbsp;<router-link to="/me" class="user"><span>{{adminName}}</span>
       </router-link>
       </div>
       <div style="display: inline-block">
@@ -142,6 +142,7 @@
           'users': {icon: 'ion-android-contacts', name: '用户管理'},
           'feedback': {icon: 'ion-ios-information-outline', name: '反馈管理'},
           'activities': {icon: 'ion-ios-infinite', name: '活动管理'},
+          'config': {icon: 'ion-android-settings', name: '系统参数'},
           'privileges': {icon: 'ion-ios-locked', name: '权限管理'},
           'me': {icon: 'ion-android-person', name: '个人中心'}
         },
@@ -169,6 +170,9 @@
           'me': [
             {index: 'info', name: '我的信息'},
             {index: 'resetpwd', name: '修改密码'}
+          ],
+          'config': [
+            {index: 'info', name: '优惠活动'}
           ]
         },
         quickMenus: [
@@ -400,10 +404,13 @@
     color: #EFF2F7;
     text-decoration: none;
   }
+  .user:hover {
+    text-decoration: solid;
+  }
 
   .menu {
     position: fixed;
-    top: 20%;
+    top: 12%;
     z-index: 3;
   }
 
