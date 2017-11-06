@@ -35,6 +35,11 @@
             <el-option v-for="major in majors" :label="major.name" :value="major.id" :key="major.id"></el-option>
           </el-select>
         </el-form-item>
+        <el-form-item label="学号" prop="stuId">
+          <!--自动搜索完成-->
+          <el-input class="w-60" v-model="form.stuId">
+          </el-input>
+        </el-form-item>
         <el-form-item label="卡号" prop="cardNumber">
           <!--自动搜索完成-->
           <el-input class="w-60" v-model="form.cardNumber">
@@ -62,6 +67,7 @@
       // ajax 查询数据校验
       let checkUsername = (rule, value, callback) => {
         if (value !== '') {
+          // TODO
 //          callback(new Error(this.form.username));
         }
         callback();
@@ -113,6 +119,7 @@
           department: '',
           major: '',
           cardNumber: '',
+          stuId: '',
           phone: '',
           balance: '',
           needCard: true

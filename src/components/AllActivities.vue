@@ -125,7 +125,7 @@
           align="center"
           width="80" v-if="updatePrivilege">
           <template scope="props">
-            <el-button size="small" type="danger" @click="del(props.row)">删除</el-button>
+            <el-button size="small" type="text" style="color: #ff4949" @click="del(props.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -221,7 +221,7 @@
       next();
     },
     beforeMount () {
-      let pagination = this.$store.getters.usersPagination;
+      let pagination = this.$store.getters.activitiesPagination;
       this.loadData(pagination.currentPage, pagination.pageSize);
     },
     data () {
@@ -424,7 +424,7 @@
         this.loadData(val, pagination.pageSize);
       },
       handleTabClick (tab, event) {
-        let pagination = this.$store.getters.feedbackPagination;
+        let pagination = this.$store.getters.activitiesPagination;
         this.loadData(1, pagination.pageSize);
       },
       dynamicQuery (queryString, cb) {
@@ -490,7 +490,7 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          fetcher.activities.del(row.id)
+          fetcher.activities.del(row.activityId)
             .then((response) => {
               if (response.data.status === 200) {
                 this.$message.success('删除成功');

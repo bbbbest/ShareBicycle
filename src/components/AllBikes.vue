@@ -100,7 +100,7 @@
         width="130" v-if="updatePrivilege">
         <template scope="props">
           <el-button size="small" type="text" @click="edit(props.row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="del(props.row)">删除</el-button>
+          <el-button size="small" type="text" style="color: #ff4949" @click="del(props.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>

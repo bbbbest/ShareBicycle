@@ -98,7 +98,7 @@
           align="center"
           width="80" v-if="updatePrivilege">
           <template scope="props">
-            <el-button size="small" type="danger" @click="del(props.row)">删除</el-button>
+            <el-button size="small" type="text" style="color: #ff4949" @click="del(props.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -147,7 +147,7 @@
       next();
     },
     beforeMount () {
-      let pagination = this.$store.getters.usersPagination;
+      let pagination = this.$store.getters.feedbackPagination;
       this.loadData(pagination.currentPage, pagination.pageSize);
     },
     data () {

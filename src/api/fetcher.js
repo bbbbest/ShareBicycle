@@ -6,6 +6,9 @@ import users from './users';
 import activities from './activities';
 import me from './me';
 import privilege from './privilege';
+import dealrecord from './dealrecord';
+import cyclingrecord from './cyclingrecord';
+
 export default {
   me: me,
   bikes: bikes,
@@ -14,5 +17,7 @@ export default {
   feedback: feedback,
   users: users,
   activities: activities,
-  privilege: privilege
+  privilege: privilege,
+  dealrecord: dealrecord,
+  cyclingrecord: cyclingrecord
 };

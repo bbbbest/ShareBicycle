@@ -10,8 +10,10 @@ import router from './router';
 import VCharts from 'v-charts';
 import axios from './api/axiosConfig/axiosProxy';
 import VueProgressBar from 'vue-progressbar';
-
+import infiniteScroll from 'vue-infinite-scroll';
 Vue.prototype.$axios = axios;
+
+Vue.use(infiniteScroll);
 
 const options = {
   color: '#13CE66',

@@ -11,11 +11,9 @@ axios.defaults.headers = {
 };
 // 添加请求拦截器
 axios.interceptors.request.use(function (config) {
-  if (config.method !== 'get' && config.method !== 'delete') {
-    if (config.method === 'post') {
-      config.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8;';
-    }
-  } else {
+  if (config.method === 'post') {
+    config.headers['Content-Type'] = 'application/x-www-form-urlencoded;charset=UTF-8;';
+  } else if (config.method === 'get' || config.method === 'delete') {
     config.headers['Content-Type'] = 'text/plain;charset=UTF-8;';
   }
   return config;

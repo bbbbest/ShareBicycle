@@ -47,10 +47,6 @@ export default {
     return axios.post('/activities', val);
   },
   del (id) {
-    return axios.delete('/activities', {
-      params: {
-        activityId: id
-      }
-    });
+    return axios.delete('/activities?id=' + id);
   }
 };

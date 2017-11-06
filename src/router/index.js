@@ -56,6 +56,18 @@ export default new Router({
           name: 'AddUser',
           meta: {requiresAuth: true},
           component: resolve => require(['../components/AddUser'], resolve)
+        },
+        {
+          path: 'deal',
+          name: 'Deal',
+          meta: {requiresAuth: true},
+          component: resolve => require(['../components/DealRecords'], resolve)
+        },
+        {
+          path: 'cycling',
+          name: 'Cycling',
+          meta: {requiresAuth: true},
+          component: resolve => require(['../components/CyclingRecords'], resolve)
         }
       ]
     },
