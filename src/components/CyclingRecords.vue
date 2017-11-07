@@ -1,14 +1,17 @@
 <template>
   <div class="container" v-if="uid">
     <baidu-map class="bm-view"
+               @addoverlay="mapReady"
                :center="{lng: (startPoint.lng + endPoint.lng)/2, lat: (startPoint.lat + endPoint.lat)/2}"
-               :zoom="15" :scroll-wheel-zoom="true"
+               :zoom="zoom" :scroll-wheel-zoom="true"
                ak="7tsGIRdUFBhrjldCcDTLXXYzWWWUu29N">
       <bm-marker
+        title="起始地点"
         :position="startPoint"
         :dragging="true">
       </bm-marker>
       <bm-marker
+        title="结束地点"
         :position="endPoint"
         animation="BMAP_ANIMATION_BOUNCE"
         :dragging="true">
@@ -83,6 +86,7 @@
     data () {
       // 数据
       return {
+        zoom: 15,
         uid: null,
         tableData: [],
         startPoint: {
@@ -101,6 +105,9 @@
         this.startPoint.lat = row.startLocY;
         this.endPoint.lng = row.endLocX;
         this.endPoint.lat = row.endLocY;
+      },
+      mapReady (type) {
+        this.zoom = type.target.map.getViewport(eval([this.startPoint, this.endPoint])).zoom;
       }
     }
   };
@@ -110,7 +117,7 @@
 
   .bm-view {
     width: 100%;
-    height: 300px;
+    height: 320px;
     margin-bottom: 10px;
   }
 </style>

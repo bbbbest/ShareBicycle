@@ -23,7 +23,7 @@
           ></el-autocomplete>
         </el-col>
         <el-col :span="13" style="text-align: right">
-          <el-button class="submit" :loading="loading" @click="loadData(pagination.currentPage, pagination.pageSize)">
+          <el-button class="submit" :loading="loading" @click="reload">
             {{loading? '加载中':'刷新'}}
           </el-button>
         </el-col>
@@ -125,6 +125,7 @@
   import {mapGetters} from 'vuex';
   import * as types from '../store/types';
   import fetcher from '../api/fetcher';
+
   const statusValue = ['未读', '未处理', '已处理'];
   export default {
     name: 'all-feedback',
@@ -146,7 +147,9 @@
       }
       next();
     },
-    beforeMount () {
+    created () {
+      this.activeTab = this.$route.query.t === '1' ? 'un' : 'all';
+      console.log(this.activeTab);
       let pagination = this.$store.getters.feedbackPagination;
       this.loadData(pagination.currentPage, pagination.pageSize);
     },
@@ -195,6 +198,13 @@
             });
         }
       },
+      loadCurrentPage (offset) {
+        let pagination = this.$store.getters.feedbackPagination;
+        this.loadData(pagination.currentPage + offset, pagination.pageSize);
+      },
+      reload () {
+        this.loadCurrentPage(0);
+      },
       // 对话框开关
       openDialog () {
         this.dialogVisible = true;
@@ -239,6 +249,9 @@
         this.loadData(val, pagination.pageSize);
       },
       handleTabClick (tab, event) {
+        if (tab.name === 'un') {
+          this.$store.commit(types.RESET_QUICK_FEEDBACK);
+        }
         let pagination = this.$store.getters.feedbackPagination;
         this.loadData(1, pagination.pageSize);
       },
@@ -273,8 +286,7 @@
       tagClass (status) {
         if (status === '0' || status === '1') {
           return 'warning';
-        }
-        if (status === '2') {
+        } else {
           return 'success';
         }
       },
@@ -284,11 +296,11 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          fetcher.feedback.del(row.id)
+          fetcher.feedback.deleteItem(row.adviseId)
             .then((response) => {
               if (response.data.status === 200) {
                 this.$message.success('删除成功');
-                if (this.bikes.length === 1) {
+                if (this.feedback.length === 1) {
                   this.loadCurrentPage(-1);
                 } else {
                   this.loadCurrentPage(0);
@@ -298,10 +310,8 @@
               }
             })
             .catch(() => {
-              this.$message.error('删除失败');
+              this.$message.error('网络错误');
             });
-        }).catch(() => {
-          this.$message.info('已取消删除');
         });
       },
       clicked (row, expanded) {
@@ -312,7 +322,9 @@
     },
     filters: {
       statusFilter (status) {
-        return statusValue[Number.parseInt(status)];
+        let s = Number.parseInt(status);
+        if (s > 2) s = 2;
+        return statusValue[s];
       }
     },
     computed: {

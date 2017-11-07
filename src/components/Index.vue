@@ -96,7 +96,7 @@
           </el-autocomplete>
         </el-form-item>
         <el-form-item>
-          <el-input class="w-80" v-model="rechargeUser.rechargeValue">
+          <el-input class="w-80" v-model.number="rechargeUser.rechargeValue">
             <span slot="append">元</span>
           </el-input>
         </el-form-item>
@@ -129,7 +129,7 @@
         collapse: false,
         dialogVisible: false,
         rechargeUser: {
-          rechargeValue: null,
+          rechargeValue: 10,
           type: 'username',
           selecting: false,
           selected: false,

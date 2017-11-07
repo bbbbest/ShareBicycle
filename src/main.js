@@ -7,7 +7,7 @@ import './assets/global/css/ionicons.min.css';
 import App from './App';
 import store from './store';
 import router from './router';
-import VCharts from 'v-charts';
+import VeLine from 'v-charts/lib/line';
 import axios from './api/axiosConfig/axiosProxy';
 import VueProgressBar from 'vue-progressbar';
 import infiniteScroll from 'vue-infinite-scroll';
@@ -29,7 +29,8 @@ const options = {
   inverse: false
 };
 Vue.use(VueProgressBar, options);
-Vue.use(VCharts);
+Vue.component(VeLine.name, VeLine);
+
 Vue.use(ElementUI);
 Vue.config.productionTip = false;
 /* eslint-disable no-new */

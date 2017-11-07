@@ -284,7 +284,7 @@
           vm.activeTab = 'un';
         } else {
           vm.activeTab = 'all';
-          vm.fetching = true;
+          vm.fetchDisabled = true;
         }
       });
     },
@@ -293,7 +293,7 @@
         this.activeTab = 'un';
       } else {
         this.activeTab = 'all';
-        this.fetching = true;
+        this.fetchDisabled = true;
       }
       next();
     },
@@ -350,7 +350,7 @@
           {text: '冻结', value: '0'},
           {text: '正常', value: '1'}
         ],
-        fetching: false,
+        fetchDisabled: false,
         application: [],
         applicationStart: 1,
         applicationPageSize: 10,
@@ -420,10 +420,8 @@
               }
             })
             .catch(() => {
-              this.$message.error('删除失败');
+              this.$message.error('网络错误');
             });
-        }).catch(() => {
-          this.$message.info('已取消删除');
         });
       },
       loadCurrentPage (offset) {
@@ -452,7 +450,7 @@
             .then((response) => {
               if (response.data.status === 200) {
                 if (response.data.data.values.length < this.applicationPageSize) {
-                  this.fetching = true;
+                  this.fetchDisabled = true;
                   this.applicationCanFetch = false;
                 }
                 this.applicationStart++;
@@ -468,7 +466,7 @@
       },
       handleTabClick (tab, event) {
         if (tab.name === 'all') {
-          this.fetching = true;
+          this.fetchDisabled = true;
           this.applicationCanFetch = true;
           this.applicationStart = 1;
           this.application = [];
@@ -476,7 +474,10 @@
           this.loadData(1, pagination.pageSize);
         } else {
           // 可以无限下滑了
-          this.fetching = false;
+          if (tab.name === 'un') {
+            this.$store.commit(types.RESET_QUICK_USER);
+          }
+          this.fetchDisabled = false;
         }
       },
       dynamicQuery (queryString, cb) {

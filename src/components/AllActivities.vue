@@ -26,7 +26,7 @@
           <span class="add-button">
             <a href="javascript:void(0)" @click="openDialog" :disabled="updatePrivilege? 'disabled' : ''">添加新活动</a>
           </span>
-          <el-button class="submit" :loading="loading" @click="loadData(pagination.currentPage, pagination.pageSize)">
+          <el-button class="submit" :loading="loading" @click="reload">
             {{loading? '加载中':'刷新'}}
           </el-button>
         </el-col>
@@ -220,9 +220,9 @@
       }
       next();
     },
-    beforeMount () {
-      let pagination = this.$store.getters.activitiesPagination;
-      this.loadData(pagination.currentPage, pagination.pageSize);
+    created () {
+      this.activeTab = this.$route.query.t === '1' ? 'un' : 'all';
+      this.reload();
     },
     data () {
       let checkStart = (rule, value, callback) => {
@@ -309,6 +309,37 @@
       };
     },
     methods: {
+      loadData (current, size) {
+        console.log(this.activeTab);
+        if (!this.loading) {
+          this.loading = true;
+          let t = this.activeTab === 'all';
+          let promise;
+          if (t) {
+            this.$store.dispatch(types.FETCHER_ACTIVITY_TOTAL);
+            promise = fetcher.activities.fetchPagination(current, size);
+          } else {
+            this.$store.dispatch(types.FETCHER_ACTIVITY_UNPROCESS_TOTAL);
+            promise = fetcher.activities.fetchUnProcess(current, size);
+          }
+          promise.then((response) => {
+            this.activities = response.data.data.values;
+          })
+            .catch(() => {
+              this.$message.error('数据获取失败');
+            })
+            .then(() => {
+              this.loading = false;
+            });
+        }
+      },
+      loadCurrentPage (offset) {
+        let pagination = this.$store.getters.activitiesPagination;
+        this.loadData(pagination.currentPage + offset, pagination.pageSize);
+      },
+      reload () {
+        this.loadCurrentPage(0);
+      },
       openDialog () {
         this.dialogVisible = true;
       },
@@ -385,34 +416,6 @@
           });
         }
       },
-      reload () {
-        let pagination = this.$store.getters.activitiesPagination;
-        this.loadData(pagination.currentPage, pagination.pageSize);
-      },
-      // 刷新按钮
-      loadData (current, size) {
-        if (!this.loading) {
-          this.loading = true;
-          let t = this.activeTab === 'all';
-          let promise;
-          if (t) {
-            this.$store.dispatch(types.FETCHER_ACTIVITY_TOTAL);
-            promise = fetcher.activities.fetchPagination(current, size);
-          } else {
-            this.$store.dispatch(types.FETCHER_ACTIVITY_UNPROCESS_TOTAL);
-            promise = fetcher.activities.fetchUnProcess(current, size);
-          }
-          promise.then((response) => {
-            this.activities = response.data.data.values;
-          })
-            .catch(() => {
-              this.$message.error('数据获取失败');
-            })
-            .then(() => {
-              this.loading = false;
-            });
-        }
-      },
       // 处理分页
       handleSizeChange (val) {
         this.$store.commit(types.SET_ACTIVITIES_PAGINATION_PAGE_SIZE, {pageSize: val});
@@ -424,6 +427,9 @@
         this.loadData(val, pagination.pageSize);
       },
       handleTabClick (tab, event) {
+        if (tab.name === 'un') {
+          this.$store.commit(types.RESET_QUICK_ACTIVITY);
+        }
         let pagination = this.$store.getters.activitiesPagination;
         this.loadData(1, pagination.pageSize);
       },
@@ -476,7 +482,7 @@
             }).catch(() => {
               // failed
               this.$message.error('创建失败');
-            }).then(() => {
+            }).finally(() => {
               this.activityInfo.loading = false;
               this.closeDialog();
               this.loadCurrentPage(0);
@@ -485,39 +491,31 @@
         });
       },
       del (row) {
-        this.$confirm('您即将删除一个活动, 仍要继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          fetcher.activities.del(row.activityId)
-            .then((response) => {
-              if (response.data.status === 200) {
-                this.$message.success('删除成功');
-                if (this.bikes.length === 1) {
-                  this.loadCurrentPage(-1);
-                } else {
-                  this.loadCurrentPage(0);
-                }
+        fetcher.activities.deleteItem(row.activityId)
+          .then((response) => {
+            if (response.data.status === 200) {
+              this.$message.success('删除成功');
+              if (this.activities.length === 1) {
+                this.loadCurrentPage(-1);
               } else {
-                this.$message.error('删除失败');
+                this.loadCurrentPage(0);
               }
-            })
-            .catch(() => {
+            } else {
               this.$message.error('删除失败');
-            });
-        }).catch(() => {
-          this.$message.info('已取消删除');
-        });
+            }
+          })
+          .catch(() => {
+            this.$message.error('网络错误');
+          });
       },
       tagClass (status) {
         if (status === '1' || status === '-1') {
           return 'warning';
         }
-        if (status === '2') {
+        if (status === '2' || status === '4') {
           return 'success';
         }
-        if (status === '3') {
+        if (status === '3' || status === '5') {
           return 'danger';
         }
       },

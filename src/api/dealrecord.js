@@ -9,5 +9,12 @@ export default {
         pagesize: pageSize
       }
     });
+  },
+  fetchTodayConsumeAndRecharge (uid) {
+    return axios.get('/dealrecord', {
+      params: {
+        userid: uid
+      }
+    });
   }
 };

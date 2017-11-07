@@ -27,6 +27,7 @@ module.exports = {
     // 缩进风格
     'indent': [2],
     // 末尾必须分号结尾
-    'semi': [2, 'always']
+    'semi': [2, 'always'],
+    'no-eval': 0
   }
 };

@@ -1,13 +1,34 @@
 <template>
   <div class="container" v-if="uid">
+    <div class="subscribe">
+      <div class="today-consume">
+        <div class="description">
+          今日消费
+        </div>
+        <div class="value">
+          <span>￥</span><span>{{consume}}</span>
+        </div>
+      </div>
+      <div class="today-recharge">
+        <div class="description">
+          充值
+        </div>
+        <div class="value">
+          <span>￥</span><span>{{recharge}}</span>
+        </div>
+      </div>
+      <div class="others">
+        <div>总共&nbsp;<span style="color: #ff4949">{{tableData.length}}</span>&nbsp;条</div>
+      </div>
+    </div>
     <el-table :data="tableData"
               style="width: 100%"
               border
               stripe
               v-infinite-scroll="loadMore"
-              infinite-scroll-disabled="fetching"
+              infinite-scroll-disabled="fetchDisabled"
               infinite-scroll-distance="20"
-              max-height="500">
+              max-height="450">
       <el-table-column
         prop="dealrecordId"
         label="编号"
@@ -50,36 +71,43 @@
     name: 'deal-records',
     created () {
       this.uid = this.$route.query.uid;
-    },
-    mounted () {
-      fetcher.dealrecord.fetchPagination(this.uid, 1, 5)
+      fetcher.dealrecord.fetchTodayConsumeAndRecharge(this.uid)
         .then((response) => {
-          this.tableData = response.data.data.record;
+          if (response.data.status === 200) {
+            this.consume = response.data.data.consume;
+            this.recharge = response.data.data.recharge;
+          }
         });
     },
     data () {
       // 数据
       return {
+        consume: '-',
+        recharge: '-',
+        activeTab: 'data',
         uid: null,
         tableData: [],
-        fetching: false,
+        fetchDisabled: false,
         start: 1,
-        pageSize: 10,
+        pageSize: 20,
         canFetch: true
       };
     },
     methods: {
       // 方法
       loadMore () {
+        this.fetchDisabled = true;
         if (this.canFetch) {
           fetcher.dealrecord.fetchPagination(this.uid, this.start, this.pageSize)
             .then((response) => {
               if (response.data.status === 200) {
                 // success
-                if (response.data.data.record.length < this.pageSize) {
+                if (response.data.data.record.length >= this.pageSize) {
+                  this.fetchDisabled = false;
+                } else {
                   this.canFetch = false;
-                  this.fetching = true;
                 }
+                this.start++;
                 this.tableData = this.tableData.concat(response.data.data.record);
               } else {
                 // failed
@@ -92,18 +120,69 @@
             });
         }
       }
-    },
-    computed: {
-      // 计算属性
-    },
-    filters: {
-      // 过滤器
-    },
-    watch: {
-      // 监听器
     }
   };
 </script>
 <style scoped>
   @import "../assets/global/css/global.css";
+
+  .subscribe {
+    position: relative;
+    top: -10px;
+    display: flex;
+    box-sizing: border-box;
+    justify-content: space-around;
+    align-items: center;
+    width: 100%;
+    height: 60px;
+  }
+
+  .today-consume, .today-recharge {
+    display: flex;
+    flex-direction: row;
+    width: 40%;
+    box-sizing: border-box;
+    height: 100%;
+    padding-left: 10px;
+  }
+
+  .today-consume .description, .today-recharge .description {
+    color: black;
+    font-size: 1.5em;
+    display: flex;
+    font-family: "Microsoft YaHei", sans-serif;
+    justify-content: flex-start;
+    align-items: center;
+    width: 30%;
+    height: 100%;
+  }
+
+  .today-consume .value, .today-recharge .value {
+    font-size: 1.6em;
+    font-family: "Microsoft YaHei", sans-serif;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    height: 100%;
+  }
+
+  .today-consume .value {
+    color: darkorange;
+  }
+
+  .today-recharge .value {
+    color: green;
+  }
+
+  .others {
+    display: flex;
+    justify-content: flex-end;
+    padding-right: 20px;
+    align-items: flex-end;
+    box-sizing: border-box;
+    width: 20%;
+    height: 100%;
+    padding-left: 10px;
+    font-size: small;
+  }
 </style>
