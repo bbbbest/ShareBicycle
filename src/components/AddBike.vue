@@ -30,7 +30,7 @@
             icon="search"
           ></el-autocomplete>
           <el-popover
-            ref="popover"
+            uref="popover"
             placement="right"
             trigger="click">
             <div style="line-height: 150%">
@@ -88,20 +88,20 @@
           </el-dialog>
         </el-form-item>
         <el-form-item label="锁编号" prop="lockId"
-                      :rules="[{required: true, message: '锁编号不可为空', trigger: 'blur'}]">
+                      :rules="lockRules">
           <el-input class="w-40" v-model="form.lockId"></el-input>
         </el-form-item>
       </div>
       <!--1. end-->
       <!--2.公司内购-->
       <div v-else>
-        <el-form-item v-if="form.bikes.length > 0"
+        <el-form-item v-if=" form.bikes.length> 0"
                       style="height: 30px; line-height: 16px !important; margin-top: -10px;margin-bottom: 10px">
           <span class="m-l-10px extra-msg">请输入锁编号</span>
         </el-form-item>
         <el-form-item v-for="(bike, index) in form.bikes"
                       :label="'车辆 ' + (index + 1)" :key="bike.key" :prop="'bikes.' + index +'.lockId'"
-                      :rules="{required: true, message: '锁编号不可为空', trigger: 'blur'}">
+                      :rules="lockRules">
           <el-input class="w-40" v-model="bike.lockId"></el-input>
           <el-button type="text" @click.prevent="removeBike(bike)">删除</el-button>
         </el-form-item>
@@ -126,6 +126,7 @@
 </template>
 <script type="text/ecmascript-6">
   import fetcher from '../api/fetcher';
+  import utils from '../store/utils';
 
   export default {
     name: 'add-bike',
@@ -133,10 +134,26 @@
       let checkPhoneNumber = (rule, value, callback) => {
         if (value < 10000000000) {
           callback(new Error('电话长度不能小于 11 位'));
+        } else if (!utils.isPhone(String(value))) {
+          callback(new Error('请输入正确的手机号码'));
+        } else {
+          callback();
         }
-        callback();
       };
-
+      let checkLock = (rule, value, callback) => {
+        clearTimeout(this.timeout);
+        this.timeout = setTimeout(() => {
+          this.$axios.get('/locks', {
+            params: {
+              lid: value
+            }
+          }).then((response) => {
+            callback();
+          }).catch(() => {
+            callback(new Error('该锁编号已被占用'));
+          });
+        }, 500);
+      };
       return {
         imageDialogVisible: false,
         imageDialogImageUrl: '',
@@ -149,7 +166,9 @@
           canUse: true,
           // 上传图片
           fileList: [],
-          uploadUrl: 'http://localhost:8080/admin/image',
+          uploadUrl: 'http://localhost:8080/springmvc/admin/image',
+//          uploadUrl: 'http://192.168.137.1:8080/admin/image',
+//          uploadUrl: 'http://172.16.0.214:8080/admin/image',
           url: '',
           uploadHeaders: {Authorization: this.$store.getters.token},
           extraUploadData: {},
@@ -176,8 +195,15 @@
         rule: [{required: true, message: '电话也不可为空'},
           {type: 'number', message: '电话必须为数字值'},
           {validator: checkPhoneNumber, trigger: 'blur'}
-        ]
+        ],
+        lockRules: [{required: true, message: '锁编号不可为空'},
+          {validator: checkLock, trigger: 'change'}]
       };
+    },
+    watch: {
+      'form.option' (val) {
+        this.imageDialogImageUrl = '';
+      }
     },
     methods: {
       // 上传图片
@@ -190,7 +216,9 @@
       handleSuccess (response, file, fileList) {
         if (response.status === 200) {
           this.form.url = response.data.url;
-          this.imageDialogImageUrl = 'http://localhost:8080' + this.form.url;
+//          this.imageDialogImageUrl = 'http://192.168.137.1:8080' + this.form.url;
+//          this.imageDialogImageUrl = 'http://172.16.0.214:8080' + this.form.url;
+          this.imageDialogImageUrl = 'http://localhost:8080/springmvc/' + this.form.url;
         }
       },
       beforeUpload (file) {
@@ -337,9 +365,11 @@
     position: relative;
     overflow: hidden;
   }
+
   .avatar-uploader .el-upload:hover {
     border-color: #409EFF;
   }
+
   .avatar-uploader-icon {
     font-size: 28px;
     color: #8c939d;
@@ -348,6 +378,7 @@
     line-height: 178px;
     text-align: center;
   }
+
   .avatar {
     width: 178px;
     height: 178px;

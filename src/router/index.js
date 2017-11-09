@@ -102,12 +102,6 @@ export default new Router({
           name: 'AllActivities',
           meta: {requiresAuth: true},
           component: resolve => require(['../components/AllActivities'], resolve)
-        },
-        {
-          path: 'statistics',
-          name: 'ActivitiesStatistics',
-          meta: {requiresAuth: true},
-          component: resolve => require(['../components/ActivitiesStatistics'], resolve)
         }
       ]
     },

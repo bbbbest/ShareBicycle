@@ -25,7 +25,7 @@
         <el-col v-if="activeTab != 'all'" :span="11">&nbsp;</el-col>
         <el-col :span="13" style="text-align: right">
           <span class="add-button"><router-link type="text" to="/users/add">添加新用户</router-link></span>
-          <el-button class="submit" :loading="loading" @click="loadData(pagination.currentPage, pagination.pageSize)">
+          <el-button class="submit" :loading="loading" @click="reload">
             {{loading? '加载中':'刷新'}}
           </el-button>
         </el-col>
@@ -374,6 +374,21 @@
             });
         }
       },
+      loadCurrentPage (offset) {
+        let pagination = this.$store.getters.usersPagination;
+        this.loadData(pagination.currentPage + offset, pagination.pageSize);
+      },
+      reload () {
+        if (this.activeTab === 'all') {
+          this.loadCurrentPage(0);
+        } else {
+          this.fetchDisabled = false;
+          this.applicationStart = 1;
+          this.applicationCanFetch = true;
+          this.application = [];
+          this.loadMore();
+        }
+      },
       openDialog () {
         this.dialogVisible = true;
       },
@@ -423,10 +438,6 @@
               this.$message.error('网络错误');
             });
         });
-      },
-      loadCurrentPage (offset) {
-        let pagination = this.$store.getters.usersPagination;
-        this.loadData(pagination.currentPage + offset, pagination.pageSize);
       },
       processApplication (scope, act) {
         console.log();

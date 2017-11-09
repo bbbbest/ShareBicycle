@@ -56,10 +56,10 @@
                 <el-button type="success" size="small" @click="submit(props.row, 2)">准许</el-button>
                 <el-button type="danger" size="small" @click="submit(props.row, 3)">回绝</el-button>
               </div>
-              <div v-else-if="props.row.status == 2" class="handled check">
+              <div v-else-if="props.row.status == 2 || props.row.status == 4" class="handled check">
                 <i class="ion-checkmark"></i>
               </div>
-              <div v-else-if="props.row.status == 3" class="handled uncheck">
+              <div v-else-if="props.row.status == 3 || props.row.status == 5" class="handled uncheck">
                 <i class="ion-close"></i>
               </div>
             </div>
@@ -527,7 +527,10 @@
     },
     filters: {
       statusFilter (status) {
-        return statusValue[Number.parseInt(status) + 1];
+        let s = Number.parseInt(status);
+        if (s === 4) s = 2;
+        if (s === 5) s = 3;
+        return statusValue[s + 1];
       }
     },
     computed: {

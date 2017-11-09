@@ -11,6 +11,7 @@ import VeLine from 'v-charts/lib/line';
 import axios from './api/axiosConfig/axiosProxy';
 import VueProgressBar from 'vue-progressbar';
 import infiniteScroll from 'vue-infinite-scroll';
+
 Vue.prototype.$axios = axios;
 
 Vue.use(infiniteScroll);
@@ -43,8 +44,18 @@ new Vue({
 });
 
 if (store.getters.token !== '') {
-  axios.defaults.headers['Authorization'] = store.getters.token;
+  axios.post('/validator', {token: store.getters.token})
+    .then((response) => {
+      if (response.data.status === 200) {
+        axios.defaults.headers['Authorization'] = store.getters.token;
+      }
+    })
+    .catch(() => {
+      store.dispatch('DO_LOGOUT');
+      router.push('/login');
+    });
 }
+
 router.beforeEach((to, from, next) => {
   const islogin = store.state.islogin; // 假设没有登录（这里应从接口获取）
   if (to.meta.requiresAuth && !islogin) { // 需要登录授权，这里还需要判断是否登录

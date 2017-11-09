@@ -2,7 +2,7 @@
   <div class="index">
     <!--顶部导航-->
     <header class="header">
-      <div class="brand"><span class="name">{{app.name}}</span><span class="version">V {{app.version}}</span></div>
+      <div class="brand"><span class="name" @click="toIndex">{{app.name}}</span><span class="version">V {{app.version}}</span></div>
       <div class="greeting">您好！&nbsp;&nbsp;&nbsp;&nbsp;<router-link to="/me" class="user"><span>{{adminName}}</span>
       </router-link>
       </div>
@@ -306,6 +306,9 @@
         }).finally(() => {
           this.closeDialog();
         });
+      },
+      toIndex () {
+        this.$router.push('/bikes/all');
       }
     },
     computed: {

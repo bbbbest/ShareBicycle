@@ -49,11 +49,11 @@
               <div class="content">{{ props.row.content }}</div>
               <span class="createTime">{{ props.row.createTime }}</span>
             </div>
-            <div v-if="updatePrivilege && (props.row.status == 0 || props.row.status == 1)" class="reply">
+            <div v-if="updatePrivilege && (props.row.status == '0' || props.row.status == '1')" class="reply">
               <el-input type="textarea" autosize v-model="reply"></el-input>
               <el-button class="submit" size="small" @click="submitReply(props.row, reply)">提交</el-button>
             </div>
-            <div v-else class="reply-content">
+            <div v-else-if="updatePrivilege" class="reply-content">
               <div class="content">{{ props.row.replyContent }}</div>
               <span class="createTime">{{ props.row.replyTime }}</span>
             </div>

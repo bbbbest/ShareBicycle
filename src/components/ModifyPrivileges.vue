@@ -45,8 +45,8 @@
         v-if="updateAdmin"
         width="130">
         <template scope="scope">
-          <el-button size="small" type="text" @click="edit(scope.row)">编辑</el-button>
-          <el-button size="small" type="danger" @click="del(scope.row)">删除</el-button>
+          <el-button :disabled="scope.row.adminId == adminId || scope.row.roleId == 1" size="small" type="text" @click="edit(scope.row)">编辑</el-button>
+          <el-button :disabled="scope.row.adminId == adminId || scope.row.roleId == 1" size="small" type="text" style="color: #ff4949" @click="del(scope.row)">删除</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -72,6 +72,7 @@
               v-for="privilege in allPrivileges"
               :key="privilege.id"
               :label="privilege.id"
+              :disabled="privilege.id == 1"
               :value="privilege.id">
             </el-option>
           </el-select>
@@ -338,7 +339,10 @@
       tableData () {
         return this.admins;
       },
-      ...mapGetters(['allPrivileges', 'queryAdmin', 'updateAdmin'])
+      ...mapGetters(['allPrivileges', 'queryAdmin', 'updateAdmin', 'adminId']),
+      pid () {
+        return this.$store.getters.adminInfo.privilegeId;
+      }
     },
     filters: {
       aliasFilter: (val) => map[val]

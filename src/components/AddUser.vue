@@ -21,16 +21,17 @@
         <el-checkbox v-model="form.needCard">办理骑行卡</el-checkbox>
       </el-form-item>
       <div v-if="form.needCard">
-        <!--<el-form-item label="学校" prop="school">-->
-        <!--<el-input class="w-60" v-model="form.school">-->
-        <!--</el-input>-->
-        <!--</el-form-item>-->
+        <el-form-item label="学校" prop="school">
+          <el-select v-model="form.school" placeholder="请选择" @change="loadSchools" disabled="disabled">
+            <el-option v-for="school in schools" :label="school.name" :value="school.id" :key="school.id"></el-option>
+          </el-select>
+        </el-form-item>
         <el-form-item label="院系" prop="department">
           <el-select v-model="form.department" placeholder="请选择" @change="loadMajors()">
             <el-option v-for="dept in departments" :label="dept.name" :value="dept.id" :key="dept.id"></el-option>
           </el-select>
         </el-form-item>
-        <el-form-item v-if="form.department != ''" label="专业" prop="major">
+        <el-form-item label="专业" prop="major">
           <el-select v-model="form.major" placeholder="请选择">
             <el-option v-for="major in majors" :label="major.name" :value="major.id" :key="major.id"></el-option>
           </el-select>
@@ -50,7 +51,7 @@
         </el-form-item>
       </div>
       <el-form-item label="电话" prop="phone">
-        <el-input class="w-60" v-model="form.phone"></el-input>
+        <el-input class="w-60" :maxlength="11" v-model.number="form.phone"></el-input>
       </el-form-item>
       <el-form-item>
         <el-button class="submit" :loading="submitting" @click="submit">提&nbsp;交</el-button>
@@ -60,18 +61,12 @@
 </template>
 <script type="text/ecmascript-6">
   import fetcher from '../api/fetcher';
+  import utils from '../store/utils';
 
   export default {
     name: 'add-user',
     data () {
       // ajax 查询数据校验
-      let checkUsername = (rule, value, callback) => {
-        if (value !== '') {
-          // TODO
-//          callback(new Error(this.form.username));
-        }
-        callback();
-      };
       let checkPass = (rule, value, callback) => {
         if (this.form.password2 !== '') {
           this.$refs.form.validateField('password2');
@@ -91,11 +86,25 @@
         }
         callback();
       };
-      let checkPhone = (rule, value, callback) => {
-        if (this.form.password2 !== '') {
-          this.$refs.form.validateField('password2');
+      let checkPhoneNumber = (rule, value, callback) => {
+        if (value < 10000000000) {
+          callback(new Error('电话长度不能小于 11 位'));
+        } else if (!utils.isPhone(String(value))) {
+          callback(new Error('请输入正确的手机号码'));
+        } else {
+          clearTimeout(this.timeout);
+          this.timeout = setTimeout(() => {
+            this.$axios.get('/phones', {
+              params: {
+                p: value
+              }
+            }).then((response) => {
+              callback();
+            }).catch(() => {
+              callback(new Error('该手机号已被使用'));
+            });
+          }, 500);
         }
-        callback();
       };
       let checkNumber = (rule, value, callback) => {
         if (isNaN(value)) {
@@ -108,6 +117,12 @@
         haveUsername: null,
         timeout: null,
         submitting: false,
+        schools: [
+          {
+            id: '1',
+            name: '郑州大学'
+          }
+        ],
         departments: [],
         majors: [],
         form: {
@@ -115,7 +130,7 @@
           password: '',
           password2: '',
           name: '',
-//          school: '',
+          school: '1',
           department: '',
           major: '',
           cardNumber: '',
@@ -126,8 +141,7 @@
         },
         rules: {
           username: [
-            {required: true, message: '用户名不能为空'},
-            {validator: checkUsername, trigger: 'blur'}],
+            {required: true, message: '用户名不能为空', trigger: 'blur'}],
           password: [
             {required: true, message: '密码不能为空'},
             {validator: checkPass, trigger: 'blur'}],
@@ -140,8 +154,9 @@
             {required: true, message: '卡号不能为空'},
             {validator: checkCardNumber, trigger: 'blur'}],
           phone: [
-            {required: true, message: '电话不能为空'},
-            {validator: checkPhone, trigger: 'blur'}],
+            {required: true, message: '电话也不可为空'},
+            {type: 'number', message: '电话必须为数字值'},
+            {validator: checkPhoneNumber, trigger: 'change'}],
           balance: [
             {required: true, message: '账户金额不能为空'},
             {validator: checkNumber, trigger: 'change'}]
@@ -152,6 +167,9 @@
       this.loadDepartments();
     },
     methods: {
+      loadSchools () {
+        console.log(this.form.school);
+      },
       loadDepartments () {
         fetcher.deptmajor.fetchDepartments()
           .then((response) => {
@@ -205,6 +223,10 @@
           name: f.name,
           phone: f.phone,
           needCard: f.needCard,
+          school: f.school,
+          department: f.department,
+          major: f.major,
+          stuId: f.stuId,
           cardNumber: f.cardNumber,
           balance: f.balance
         };
@@ -219,6 +241,11 @@
               }
             });
         }, 1000);
+      }
+    },
+    watch: {
+      'form.major' (val) {
+        console.log(val);
       }
     }
   };

@@ -135,7 +135,7 @@
             <el-row>
               <el-col :span="10">
                 <el-card :body-style="{ padding: '0px'}">
-                  <img style="width:100%; display: block;" alt="自行车照片" :src="'http://localhost:8080' + bikeInfo.photo">
+                  <img style="width:100%; display: block;" alt="自行车照片" :src="'http://localhost:8080/springmvc/' + bikeInfo.photo">
                 </el-card>
               </el-col>
             </el-row>
